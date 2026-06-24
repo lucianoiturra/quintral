@@ -27,6 +27,12 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ error: "Falta la imagen" }, { status: 400 });
   }
 
+  const ALLOWED_MEDIA_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"] as const;
+  type AllowedMediaType = (typeof ALLOWED_MEDIA_TYPES)[number];
+  if (!ALLOWED_MEDIA_TYPES.includes(mediaType as AllowedMediaType)) {
+    return Response.json({ error: "mediaType no soportado" }, { status: 400 });
+  }
+
   try {
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const response = await client.messages.create({
@@ -40,7 +46,7 @@ export async function POST(request: Request): Promise<Response> {
               type: "image",
               source: {
                 type: "base64",
-                media_type: mediaType as "image/jpeg" | "image/png" | "image/webp" | "image/gif",
+                media_type: mediaType as AllowedMediaType,
                 data: imageBase64,
               },
             },
