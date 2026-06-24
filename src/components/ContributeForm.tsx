@@ -46,12 +46,13 @@ export default function ContributeForm({
         set("lat", String(pos.coords.latitude));
         set("lng", String(pos.coords.longitude));
       },
-      () => setErrores(["No se pudo obtener la ubicación; ingrésala manualmente."]),
+      () => setErrores((prev) => [...prev, "No se pudo obtener la ubicación; ingrésala manualmente."]),
     );
   }
 
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
+    setOk(false);
     const errs = validateObservation(form);
     setErrores(errs);
     if (errs.length) return;
