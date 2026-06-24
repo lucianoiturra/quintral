@@ -1,18 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { parseIdentifyResult, PROMPT_IDENTIFY } from "@/lib/identify";
+import { parseIdentifyResult, extractJson, PROMPT_IDENTIFY } from "@/lib/identify";
 
 export const runtime = "nodejs";
-
-export function extractJson(text: string): unknown {
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start === -1 || end === -1 || end < start) return {};
-  try {
-    return JSON.parse(text.slice(start, end + 1));
-  } catch {
-    return {};
-  }
-}
 
 export async function POST(request: Request): Promise<Response> {
   let body: { imageBase64?: string; mediaType?: string };
