@@ -15,6 +15,10 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
 
   async function analizar() {
     if (!archivo) return;
+    if (archivo.size > 4 * 1024 * 1024) {
+      setError("La imagen es demasiado grande. Máximo 4 MB.");
+      return;
+    }
     setCargando(true);
     setError(null);
     setResultado(null);
@@ -37,12 +41,13 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
   }
 
   function agregarAlMapa() {
-    if (!resultado) return;
     onPrefill({
-      hospedero: resultado.hospederoProbable,
-      fenologia: resultado.fenologia,
+      ...(resultado ? {
+        hospedero: resultado.hospederoProbable,
+        fenologia: resultado.fenologia,
+        resultadoIa: resultado,
+      } : {}),
       fotoUrl,
-      resultadoIa: resultado,
     });
     document.getElementById("aportar")?.scrollIntoView({ behavior: "smooth" });
   }
@@ -56,16 +61,22 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
         {cargando ? "Analizando…" : "Analizar"}
       </button>
       {error && <p style={{ color: "#c0392b" }}>{error}</p>}
-      {resultado && (
+      {(resultado || fotoUrl) && (
         <div style={{ marginTop: "1rem" }}>
-          <p><strong>¿Es quintral?</strong> {resultado.esQuintral ? "Sí" : "No con certeza"}</p>
-          <p><strong>Hospedero probable:</strong> {etiquetaHospedero(resultado.hospederoProbable)} ({Math.round(resultado.confianza * 100)}%)</p>
-          <p><strong>Fenología:</strong> {resultado.fenologia || "—"}</p>
-          <p>{resultado.notas}</p>
-          {resultado.confianza < 0.5 && (
-            <p style={{ color: "#c0392b" }}>Baja confianza: confirma el hospedero a mano en el formulario.</p>
+          {resultado && (
+            <>
+              <p><strong>¿Es quintral?</strong> {resultado.esQuintral ? "Sí" : "No con certeza"}</p>
+              <p><strong>Hospedero probable:</strong> {etiquetaHospedero(resultado.hospederoProbable)} ({Math.round(resultado.confianza * 100)}%)</p>
+              <p><strong>Fenología:</strong> {resultado.fenologia || "—"}</p>
+              <p>{resultado.notas}</p>
+              {resultado.confianza < 0.5 && (
+                <p style={{ color: "#c0392b" }}>Baja confianza: confirma el hospedero a mano en el formulario.</p>
+              )}
+            </>
           )}
-          <button onClick={agregarAlMapa}>Agregar al mapa</button>
+          <button onClick={agregarAlMapa}>
+            {resultado ? "Agregar al mapa" : "Agregar foto al mapa manualmente"}
+          </button>
         </div>
       )}
     </section>

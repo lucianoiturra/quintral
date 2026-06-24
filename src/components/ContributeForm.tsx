@@ -31,6 +31,7 @@ export default function ContributeForm({
 
   useEffect(() => {
     if (!prefill) return;
+    setOk(false);
     setForm((f) => ({ ...f, ...prefill }) as FormState);
     setFotoUrl(prefill.fotoUrl ?? null);
     setResultadoIa(prefill.resultadoIa ?? null);

@@ -49,4 +49,9 @@ describe("POST /api/identify", () => {
     const res = await POST(req({ imageBase64: "AAAA", mediaType: "image/jpeg" }));
     expect(res.status).toBe(500);
   });
+
+  it("400 si el mediaType no está en la lista permitida", async () => {
+    const res = await POST(req({ imageBase64: "AAAA", mediaType: "application/pdf" }));
+    expect(res.status).toBe(400);
+  });
 });
