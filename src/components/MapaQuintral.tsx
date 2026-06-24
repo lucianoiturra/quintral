@@ -4,13 +4,11 @@ import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
 import type { Observation } from "@/lib/types";
 import { colorHospedero, etiquetaHospedero } from "@/lib/hosts";
 
-export default function MapaQuintral({ observations }: { observations: Observation[] }) {
-  const centro: [number, number] = observations.length
-    ? [observations[0].lat, observations[0].lng]
-    : [-33.2123, -70.342];
+const CENTRO_DEFAULT: [number, number] = [-33.2123, -70.342];
 
+export default function MapaQuintral({ observations }: { observations: Observation[] }) {
   return (
-    <MapContainer center={centro} zoom={14} style={{ height: 480, width: "100%" }}>
+    <MapContainer center={CENTRO_DEFAULT} zoom={14} style={{ height: 480, width: "100%" }}>
       <TileLayer
         url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; OpenStreetMap'
@@ -27,7 +25,7 @@ export default function MapaQuintral({ observations }: { observations: Observati
             <br />
             {o.fenologia || "sin fenología"}
             <br />
-            {o.cerro ?? ""} · {o.nombreObservador}
+            {o.cerro ?? "sin cerro"} · {o.nombreObservador}
             {o.fotoUrl ? (
               <>
                 <br />
