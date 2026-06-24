@@ -58,7 +58,7 @@ export async function fetchObservations(): Promise<Observation[]> {
     .select("*")
     .order("creado_en", { ascending: false });
   if (error) throw new Error(error.message);
-  return (data as ObservacionRow[]).map(mapRowToObservation);
+  return ((data ?? []) as ObservacionRow[]).map(mapRowToObservation);
 }
 
 export async function createObservation(input: NewObservation): Promise<Observation> {
@@ -80,5 +80,6 @@ export async function createObservation(input: NewObservation): Promise<Observat
     .select("*")
     .single();
   if (error) throw new Error(error.message);
+  if (!data) throw new Error("No se recibió dato al crear la observación");
   return mapRowToObservation(data as ObservacionRow);
 }
