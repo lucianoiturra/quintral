@@ -21,9 +21,8 @@ function toHost(value: unknown): Host {
 }
 
 function toConfidence(value: unknown): number {
-  const n = typeof value === "number" ? value : Number(value);
-  if (!Number.isFinite(n)) return 0;
-  return Math.min(1, Math.max(0, n));
+  if (typeof value !== "number" || !Number.isFinite(value)) return 0;
+  return Math.min(1, Math.max(0, value));
 }
 
 function toStr(value: unknown): string {
