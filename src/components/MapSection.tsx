@@ -2,7 +2,7 @@
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import type { Host, Observation } from "@/lib/types";
-import { HOSPEDEROS, etiquetaHospedero } from "@/lib/hosts";
+import { HOSPEDEROS, etiquetaHospedero, colorHospedero } from "@/lib/hosts";
 import { filterObservations } from "@/lib/filterObservations";
 
 const MapaQuintral = dynamic(() => import("@/components/MapaQuintral"), { ssr: false });
@@ -21,29 +21,74 @@ export default function MapSection({ observations }: { observations: Observation
   );
 
   return (
-    <section id="mapa" style={{ padding: "2rem 1rem", maxWidth: 1000, margin: "0 auto" }}>
-      <h2>Mapa georreferenciado de registros</h2>
-      <div style={{ display: "flex", gap: "1rem", margin: "1rem 0", flexWrap: "wrap" }}>
-        <label>
-          Cerro:{" "}
-          <select value={cerro} onChange={(e) => setCerro(e.target.value)}>
-            <option value="todos">Todos</option>
-            {cerros.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Hospedero:{" "}
-          <select value={hospedero} onChange={(e) => setHospedero(e.target.value as Host | "todos")}>
-            <option value="todos">Todos</option>
-            {HOSPEDEROS.map((h) => (
-              <option key={h} value={h}>{etiquetaHospedero(h)}</option>
-            ))}
-          </select>
-        </label>
+    <section id="mapa" className="section--tint">
+      <div className="section section-inner">
+        <div className="section-head">
+          <p className="kicker" data-num="02">Cartografía científica</p>
+          <h2>Mapa georreferenciado de registros</h2>
+          <p>
+            Cada punto representa un ejemplar documentado, con hospedero, estado,
+            altitud y exposición. {visibles.length} de {observations.length} registros visibles.
+          </p>
+        </div>
+
+        <div className="map-filters">
+          <div className="filter-group">
+            <span className="filter-label">Cerro</span>
+            <div className="pill-row">
+              <button
+                type="button"
+                className="pill"
+                aria-pressed={cerro === "todos"}
+                onClick={() => setCerro("todos")}
+              >
+                Todos
+              </button>
+              {cerros.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  className="pill"
+                  aria-pressed={cerro === c}
+                  onClick={() => setCerro(c)}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="filter-group">
+            <span className="filter-label">Hospedero</span>
+            <div className="pill-row">
+              <button
+                type="button"
+                className="pill"
+                aria-pressed={hospedero === "todos"}
+                onClick={() => setHospedero("todos")}
+              >
+                Todos
+              </button>
+              {HOSPEDEROS.map((h) => (
+                <button
+                  key={h}
+                  type="button"
+                  className="pill"
+                  aria-pressed={hospedero === h}
+                  onClick={() => setHospedero(h)}
+                >
+                  <span className="dot" style={{ background: colorHospedero(h) }} />
+                  {etiquetaHospedero(h)}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="map-frame">
+          <MapaQuintral observations={visibles} />
+        </div>
       </div>
-      <MapaQuintral observations={visibles} />
     </section>
   );
 }

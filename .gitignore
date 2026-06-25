@@ -4,3 +4,10 @@ node_modules
 *.tsbuildinfo
 next-env.d.ts
 .superpowers/sdd/
+
+# Herramientas de agentes / skills (no son código del proyecto)
+.agents/
+.cursor/
+.gemini/
+.claude/
+.impeccable/

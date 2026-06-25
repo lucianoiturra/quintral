@@ -8,10 +8,19 @@ import type { Prefill } from "@/components/ContributeForm";
 
 export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill) => void }) {
   const [archivo, setArchivo] = useState<File | null>(null);
+  const [previa, setPrevia] = useState<string | null>(null);
   const [resultado, setResultado] = useState<IdentifyResult | null>(null);
   const [fotoUrl, setFotoUrl] = useState<string | null>(null);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  function elegir(f: File | null) {
+    setArchivo(f);
+    setResultado(null);
+    setFotoUrl(null);
+    setError(null);
+    setPrevia(f ? URL.createObjectURL(f) : null);
+  }
 
   async function analizar() {
     if (!archivo) return;
@@ -42,43 +51,139 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
 
   function agregarAlMapa() {
     onPrefill({
-      ...(resultado ? {
-        hospedero: resultado.hospederoProbable,
-        fenologia: resultado.fenologia,
-        resultadoIa: resultado,
-      } : {}),
+      ...(resultado
+        ? {
+            hospedero: resultado.hospederoProbable,
+            fenologia: resultado.fenologia,
+            resultadoIa: resultado,
+          }
+        : {}),
       fotoUrl,
     });
     document.getElementById("aportar")?.scrollIntoView({ behavior: "smooth" });
   }
 
+  const conf = resultado ? Math.round(resultado.confianza * 100) : 0;
+
   return (
-    <section id="identificar" style={{ padding: "2rem 1rem", maxWidth: 1000, margin: "0 auto" }}>
-      <h2>Identificación automática con IA</h2>
-      <p>Sube una foto del ejemplar. El modelo estima especie, hospedero y fenología.</p>
-      <input type="file" accept="image/*" onChange={(e) => setArchivo(e.target.files?.[0] ?? null)} />
-      <button onClick={analizar} disabled={!archivo || cargando}>
-        {cargando ? "Analizando…" : "Analizar"}
-      </button>
-      {error && <p style={{ color: "#c0392b" }}>{error}</p>}
-      {(resultado || fotoUrl) && (
-        <div style={{ marginTop: "1rem" }}>
+    <section id="identificar" className="section">
+      <div className="section-head">
+        <p className="kicker" data-num="01">Visión por computador</p>
+        <h2>Identificación automática con IA</h2>
+        <p>
+          Sube una fotografía del ejemplar. El modelo estima especie, hospedero
+          probable y fenología.
+        </p>
+      </div>
+
+      <div className="identify-grid">
+        {/* — Columna de subida — */}
+        <div className="card card-pad">
+          <label className="dropzone">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => elegir(e.target.files?.[0] ?? null)}
+              hidden
+            />
+            {previa ? (
+              <img src={previa} alt="Vista previa del ejemplar" className="dropzone-preview" />
+            ) : (
+              <span className="dropzone-empty">
+                <svg viewBox="0 0 24 24" width="30" height="30" fill="none" aria-hidden="true">
+                  <path
+                    d="M12 16V4m0 0L8 8m4-4 4 4M5 16v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <strong>Haz clic para subir una foto</strong>
+                <small>JPG · PNG, hasta 4 MB</small>
+              </span>
+            )}
+          </label>
+
+          <div className="identify-actions">
+            <span className="identify-meta">Modelo Quintral&nbsp;v0.1 (demo)</span>
+            <div className="identify-buttons">
+              {archivo && (
+                <button type="button" className="btn btn--ghost" onClick={() => elegir(null)}>
+                  Limpiar
+                </button>
+              )}
+              <button
+                type="button"
+                className="btn btn--primary"
+                onClick={analizar}
+                disabled={!archivo || cargando}
+              >
+                {cargando ? "Analizando…" : "Analizar"}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* — Columna de resultado — */}
+        <div className="card card-pad result">
+          <h3 className="result-title">Resultado del análisis</h3>
+          {error && <p className="alert alert--error">{error}</p>}
+
+          {!resultado && !error && (
+            <p className="result-empty">
+              Sube una imagen para evaluar el ejemplar y obtener el hospedero
+              probable, la confianza del modelo y notas de campo.
+            </p>
+          )}
+
           {resultado && (
             <>
-              <p><strong>¿Es quintral?</strong> {resultado.esQuintral ? "Sí" : "No con certeza"}</p>
-              <p><strong>Hospedero probable:</strong> {etiquetaHospedero(resultado.hospederoProbable)} ({Math.round(resultado.confianza * 100)}%)</p>
-              <p><strong>Fenología:</strong> {resultado.fenologia || "—"}</p>
-              <p>{resultado.notas}</p>
+              <div className="result-verdict">
+                <span className={`badge ${resultado.esQuintral ? "badge--yes" : "badge--maybe"}`}>
+                  {resultado.esQuintral ? "Es quintral" : "Sin certeza"}
+                </span>
+                <span className="result-host">
+                  Hospedero: <strong>{etiquetaHospedero(resultado.hospederoProbable)}</strong>
+                </span>
+              </div>
+
+              <div className="result-conf">
+                <div className="result-conf-head">
+                  <span>Confianza del modelo</span>
+                  <strong>{conf}%</strong>
+                </div>
+                <div className="meter" role="meter" aria-valuenow={conf} aria-valuemin={0} aria-valuemax={100}>
+                  <span style={{ transform: `scaleX(${conf / 100})` }} />
+                </div>
+              </div>
+
+              <dl className="result-data">
+                <div>
+                  <dt>Fenología</dt>
+                  <dd>{resultado.fenologia || "—"}</dd>
+                </div>
+                <div>
+                  <dt>Notas</dt>
+                  <dd>{resultado.notas || "—"}</dd>
+                </div>
+              </dl>
+
               {resultado.confianza < 0.5 && (
-                <p style={{ color: "#c0392b" }}>Baja confianza: confirma el hospedero a mano en el formulario.</p>
+                <p className="alert alert--error">
+                  Baja confianza: confirma el hospedero a mano en el formulario.
+                </p>
               )}
             </>
           )}
-          <button onClick={agregarAlMapa}>
-            {resultado ? "Agregar al mapa" : "Agregar foto al mapa manualmente"}
-          </button>
+
+          {(resultado || fotoUrl) && (
+            <button type="button" className="btn btn--forest result-cta" onClick={agregarAlMapa}>
+              {resultado ? "Agregar al mapa" : "Agregar foto al mapa manualmente"}
+            </button>
+          )}
         </div>
-      )}
+      </div>
     </section>
   );
 }

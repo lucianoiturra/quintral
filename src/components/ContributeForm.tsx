@@ -85,41 +85,124 @@ export default function ContributeForm({
   }
 
   return (
-    <section id="aportar" style={{ padding: "2rem 1rem", maxWidth: 1000, margin: "0 auto" }}>
-      <h2>Aporta tus propias observaciones</h2>
-      <form onSubmit={enviar} style={{ display: "grid", gap: ".75rem", maxWidth: 520 }}>
-        <input placeholder="Tu nombre" value={form.nombreObservador}
-          onChange={(e) => set("nombreObservador", e.target.value)} />
-        <div style={{ display: "flex", gap: ".5rem" }}>
-          <input placeholder="Latitud" value={form.lat} onChange={(e) => set("lat", e.target.value)} />
-          <input placeholder="Longitud" value={form.lng} onChange={(e) => set("lng", e.target.value)} />
-          <button type="button" onClick={usarUbicacion}>Usar mi ubicación</button>
-        </div>
-        <select value={form.hospedero} onChange={(e) => set("hospedero", e.target.value as Host)}>
-          {HOSPEDEROS.map((h) => (
-            <option key={h} value={h}>{etiquetaHospedero(h)}</option>
-          ))}
-        </select>
-        {form.hospedero === "otro" && (
-          <input placeholder="Nuevo hospedero" value={form.hospederoOtro}
-            onChange={(e) => set("hospederoOtro", e.target.value)} />
-        )}
-        <input placeholder="Fenología / estado" value={form.fenologia}
-          onChange={(e) => set("fenologia", e.target.value)} />
-        <input placeholder="Altitud (m, opcional)" value={form.altitud}
-          onChange={(e) => set("altitud", e.target.value)} />
-        <input placeholder="Exposición solar (opcional)" value={form.exposicionSolar}
-          onChange={(e) => set("exposicionSolar", e.target.value)} />
-        <input placeholder="Cerro (opcional)" value={form.cerro}
-          onChange={(e) => set("cerro", e.target.value)} />
-        {errores.length > 0 && (
-          <ul style={{ color: "#c0392b" }}>{errores.map((er) => <li key={er}>{er}</li>)}</ul>
-        )}
-        {ok && <p style={{ color: "#1f3d2b" }}>¡Registro agregado al mapa!</p>}
-        <button type="submit" disabled={enviando}>
-          {enviando ? "Enviando…" : "Enviar observación"}
-        </button>
-      </form>
+    <section id="aportar" className="section">
+      <div className="section-head">
+        <p className="kicker" data-num="03">Ciencia ciudadana</p>
+        <h2>Aporta tus propias observaciones</h2>
+        <p>
+          Tus registros enriquecen el monitoreo del quintral. Cada observación
+          valida y amplía el modelo y el mapa.
+        </p>
+      </div>
+
+      <div className="contribute-grid">
+        <form className="card card-pad contribute-form" onSubmit={enviar}>
+          {fotoUrl && (
+            <p className="contribute-attached">
+              <span className="dot" style={{ background: "var(--forest-bright)" }} />
+              Foto adjunta desde la identificación
+            </p>
+          )}
+
+          <label className="field">
+            <span>Observador</span>
+            <input
+              placeholder="Tu nombre"
+              value={form.nombreObservador}
+              onChange={(e) => set("nombreObservador", e.target.value)}
+            />
+          </label>
+
+          <div className="field-row">
+            <label className="field">
+              <span>Latitud</span>
+              <input placeholder="-33.21" value={form.lat} onChange={(e) => set("lat", e.target.value)} />
+            </label>
+            <label className="field">
+              <span>Longitud</span>
+              <input placeholder="-70.34" value={form.lng} onChange={(e) => set("lng", e.target.value)} />
+            </label>
+            <button type="button" className="btn btn--ghost field-gps" onClick={usarUbicacion}>
+              Usar mi ubicación
+            </button>
+          </div>
+
+          <div className="field-row">
+            <label className="field">
+              <span>Hospedero</span>
+              <select value={form.hospedero} onChange={(e) => set("hospedero", e.target.value as Host)}>
+                {HOSPEDEROS.map((h) => (
+                  <option key={h} value={h}>{etiquetaHospedero(h)}</option>
+                ))}
+              </select>
+            </label>
+            {form.hospedero === "otro" && (
+              <label className="field">
+                <span>Nuevo hospedero</span>
+                <input
+                  placeholder="Especie observada"
+                  value={form.hospederoOtro}
+                  onChange={(e) => set("hospederoOtro", e.target.value)}
+                />
+              </label>
+            )}
+          </div>
+
+          <div className="field-row">
+            <label className="field">
+              <span>Fenología / estado</span>
+              <input
+                placeholder="Floración, fruto…"
+                value={form.fenologia}
+                onChange={(e) => set("fenologia", e.target.value)}
+              />
+            </label>
+            <label className="field">
+              <span>Cerro (opcional)</span>
+              <input placeholder="Manquehue…" value={form.cerro} onChange={(e) => set("cerro", e.target.value)} />
+            </label>
+          </div>
+
+          <div className="field-row">
+            <label className="field">
+              <span>Altitud (m, opcional)</span>
+              <input placeholder="1200" value={form.altitud} onChange={(e) => set("altitud", e.target.value)} />
+            </label>
+            <label className="field">
+              <span>Exposición solar (opcional)</span>
+              <input
+                placeholder="Norte, sur…"
+                value={form.exposicionSolar}
+                onChange={(e) => set("exposicionSolar", e.target.value)}
+              />
+            </label>
+          </div>
+
+          {errores.length > 0 && (
+            <ul className="error-list">{errores.map((er) => <li key={er}>{er}</li>)}</ul>
+          )}
+          {ok && <p className="alert alert--ok">¡Registro agregado al mapa!</p>}
+
+          <button type="submit" className="btn btn--primary contribute-submit" disabled={enviando}>
+            {enviando ? "Enviando…" : "Enviar observación"}
+          </button>
+        </form>
+
+        <aside className="observer-panel">
+          <h3>Red de observadores</h3>
+          <p>
+            La ciencia ciudadana permite detectar nuevos hospederos del quintral
+            en el bosque esclerófilo de Chile central. Tus registros ayudan a
+            entender cómo cambia su distribución entre cerros y a lo largo del año.
+          </p>
+          <ul className="observer-list">
+            <li>Fotografía clara del ejemplar y del hospedero.</li>
+            <li>Coordenadas GPS o ubicación en el terreno.</li>
+            <li>Estado fenológico: floración, fruto, decaimiento.</li>
+            <li>Cualquier hospedero no documentado antes.</li>
+          </ul>
+        </aside>
+      </div>
     </section>
   );
 }
