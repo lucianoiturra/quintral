@@ -25,7 +25,7 @@ export async function POST(request: Request): Promise<Response> {
   try {
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const response = await client.messages.create({
-      model: "claude-opus-4-8",
+      model: "claude-sonnet-4-6",
       max_tokens: 1024,
       messages: [
         {
