@@ -484,7 +484,7 @@ label.inline {
 }
 
 @media (max-width: 560px) {
-  .nav-links a:nth-child(3) {
+  .nav-links a:nth-child(n + 3) {
     display: none;
   }
 }
@@ -969,6 +969,148 @@ label.inline {
 @media (max-width: 860px) {
   .identify-grid,
   .contribute-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   Secciones de fitoquímica: gráficos
+   ============================================================ */
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1rem, 0.5rem + 1.5vw, 1.75rem);
+  align-items: start;
+}
+
+.radar {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.radar-grid {
+  fill: none;
+  stroke: var(--line-soft);
+  stroke-width: 1;
+}
+
+.radar-axis {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.radar-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--ink-soft);
+}
+
+.chart-legend {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+.chart-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex: none;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.data-table th,
+.data-table td {
+  text-align: left;
+  padding: 0.55rem 0.6rem;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.data-table thead th {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+}
+
+.data-table tbody th {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.data-table td {
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.data-source {
+  margin: 0.85rem 0 0;
+  font-size: 0.82rem;
+  color: var(--ink-faint);
+}
+
+.chart-note {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.bar-chart {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.bar-grid {
+  stroke: var(--line-soft);
+  stroke-width: 1;
+}
+
+.bar-tick,
+.bar-cat {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  fill: var(--ink-faint);
+}
+
+.bar-cat {
+  fill: var(--ink-soft);
+  font-weight: 600;
+}
+
+.bar-value {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 700;
+  fill: var(--ink);
+}
+
+.predecir-form {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+@media (max-width: 860px) {
+  .chart-grid {
     grid-template-columns: 1fr;
   }
 }

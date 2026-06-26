@@ -17,6 +17,8 @@ export default function Nav() {
         <div className="nav-links">
           <a href="#identificar">Identificar</a>
           <a href="#mapa">Mapa</a>
+          <a href="#comparar">Compuestos</a>
+          <a href="#predecir">Predicción</a>
           <a href="#aportar">Ciencia ciudadana</a>
         </div>
       </div>
