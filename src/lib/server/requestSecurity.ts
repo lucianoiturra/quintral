@@ -1,7 +1,8 @@
+import { ALLOWED_IMAGE_TYPES, type AllowedImageType } from "@/lib/imageMime";
 import { checkRateLimit } from "@/lib/server/rateLimit";
 
-export const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
-export type AllowedImageType = (typeof ALLOWED_IMAGE_TYPES)[number];
+export { ALLOWED_IMAGE_TYPES };
+export type { AllowedImageType };
 
 export function getClientIp(request: Request): string {
   const forwarded = request.headers.get("x-forwarded-for");

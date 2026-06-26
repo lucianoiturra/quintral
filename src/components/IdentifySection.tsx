@@ -1,25 +1,26 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Prefill } from "@/components/ContributeForm";
 import { etiquetaHospedero } from "@/lib/hosts";
 import { fileToBase64 } from "@/lib/fileToBase64";
+import { inferImageMediaType } from "@/lib/imageMime";
 import type { IdentifyResult } from "@/lib/types";
-import { uploadFoto } from "@/lib/uploadFoto";
-
-const TIPOS_PERMITIDOS = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill) => void }) {
   const [archivo, setArchivo] = useState<File | null>(null);
   const [previa, setPrevia] = useState<string | null>(null);
   const [resultado, setResultado] = useState<IdentifyResult | null>(null);
-  const [fotoUrl, setFotoUrl] = useState<string | null>(null);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!previa) return;
+    return () => URL.revokeObjectURL(previa);
+  }, [previa]);
 
   function elegir(file: File | null) {
     setArchivo(file);
     setResultado(null);
-    setFotoUrl(null);
     setError(null);
     setPrevia(file ? URL.createObjectURL(file) : null);
   }
@@ -27,7 +28,7 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
   async function analizar() {
     if (!archivo) return;
 
-    if (!TIPOS_PERMITIDOS.has(archivo.type)) {
+    if (!inferImageMediaType(archivo)) {
       setError("Solo se permiten imagenes JPG, PNG o WEBP.");
       return;
     }
@@ -42,9 +43,6 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
     setResultado(null);
 
     try {
-      const url = await uploadFoto(archivo);
-      setFotoUrl(url);
-
       const { base64, mediaType } = await fileToBase64(archivo);
       const res = await fetch("/api/identify", {
         method: "POST",
@@ -74,7 +72,7 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
             resultadoIa: resultado,
           }
         : {}),
-      fotoUrl,
+      fotoArchivo: archivo,
     });
 
     document.getElementById("aportar")?.scrollIntoView({ behavior: "smooth" });
@@ -207,7 +205,7 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
             </>
           ) : null}
 
-          {resultado || fotoUrl ? (
+          {resultado || archivo ? (
             <button type="button" className="btn btn--forest result-cta" onClick={agregarAlMapa}>
               {resultado ? "Agregar al mapa" : "Agregar foto al mapa manualmente"}
             </button>

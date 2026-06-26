@@ -4,9 +4,11 @@ import type { Host, Observation } from "@/lib/types";
 import { HOSPEDEROS, etiquetaHospedero } from "@/lib/hosts";
 import { validateObservation, type FormState } from "@/lib/validateObservation";
 import { createObservation } from "@/lib/observations";
+import { uploadFoto } from "@/lib/uploadFoto";
 
 export interface Prefill extends Partial<FormState> {
   fotoUrl?: string | null;
+  fotoArchivo?: File | null;
   resultadoIa?: unknown;
 }
 
@@ -24,6 +26,7 @@ export default function ContributeForm({
 }) {
   const [form, setForm] = useState<FormState>(VACIO);
   const [fotoUrl, setFotoUrl] = useState<string | null>(null);
+  const [fotoArchivo, setFotoArchivo] = useState<File | null>(null);
   const [resultadoIa, setResultadoIa] = useState<unknown>(null);
   const [errores, setErrores] = useState<string[]>([]);
   const [enviando, setEnviando] = useState(false);
@@ -34,6 +37,7 @@ export default function ContributeForm({
     setOk(false);
     setForm((f) => ({ ...f, ...prefill }) as FormState);
     setFotoUrl(prefill.fotoUrl ?? null);
+    setFotoArchivo(prefill.fotoArchivo ?? null);
     setResultadoIa(prefill.resultadoIa ?? null);
   }, [prefill]);
 
@@ -59,6 +63,7 @@ export default function ContributeForm({
     if (errs.length) return;
     setEnviando(true);
     try {
+      const finalFotoUrl = fotoUrl ?? (fotoArchivo ? await uploadFoto(fotoArchivo) : null);
       const o = await createObservation({
         nombreObservador: form.nombreObservador.trim(),
         lat: Number(form.lat),
@@ -68,7 +73,7 @@ export default function ContributeForm({
         fenologia: form.fenologia.trim(),
         altitud: form.altitud.trim() ? Number(form.altitud) : null,
         exposicionSolar: form.exposicionSolar.trim() || null,
-        fotoUrl,
+        fotoUrl: finalFotoUrl,
         resultadoIa,
         cerro: form.cerro.trim() || null,
       });
@@ -76,6 +81,7 @@ export default function ContributeForm({
       setOk(true);
       setForm(VACIO);
       setFotoUrl(null);
+      setFotoArchivo(null);
       setResultadoIa(null);
     } catch (err) {
       setErrores([err instanceof Error ? err.message : "Error al guardar el registro."]);
@@ -97,7 +103,7 @@ export default function ContributeForm({
 
       <div className="contribute-grid">
         <form className="card card-pad contribute-form" onSubmit={enviar}>
-          {fotoUrl && (
+          {(fotoUrl || fotoArchivo) && (
             <p className="contribute-attached">
               <span className="dot" style={{ background: "var(--forest-bright)" }} />
               Foto adjunta desde la identificación

@@ -1,5 +1,31 @@
 import { describe, it, expect } from "vitest";
-import { parseIdentifyResult } from "@/lib/identify";
+import { extractJson, parseIdentifyResult } from "@/lib/identify";
+
+describe("extractJson", () => {
+  it("parsea JSON puro directamente", () => {
+    expect(
+      extractJson('{"esQuintral":true,"opciones":[],"fenologia":"en flor","notas":"ok"}'),
+    ).toEqual({
+      esQuintral: true,
+      opciones: [],
+      fenologia: "en flor",
+      notas: "ok",
+    });
+  });
+
+  it("encuentra el JSON correcto aunque haya llaves en texto libre", () => {
+    expect(
+      extractJson(
+        'Observacion preliminar: corteza con grietas {finas}. Resultado: {"esQuintral":true,"opciones":[],"fenologia":"en flor","notas":"ok"}',
+      ),
+    ).toEqual({
+      esQuintral: true,
+      opciones: [],
+      fenologia: "en flor",
+      notas: "ok",
+    });
+  });
+});
 
 describe("parseIdentifyResult", () => {
   it("acepta una respuesta válida con 2 opciones", () => {

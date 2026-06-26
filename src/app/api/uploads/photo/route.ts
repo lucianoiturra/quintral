@@ -1,10 +1,9 @@
 import {
-  ALLOWED_IMAGE_TYPES,
   assertTrustedOrigin,
   enforceRateLimit,
   getExtensionForMimeType,
-  type AllowedImageType,
 } from "@/lib/server/requestSecurity";
+import { inferImageMediaType } from "@/lib/imageMime";
 import { getSupabaseAdmin } from "@/lib/server/supabaseAdmin";
 
 export const runtime = "nodejs";
@@ -33,7 +32,8 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ error: "Falta el archivo." }, { status: 400 });
   }
 
-  if (!ALLOWED_IMAGE_TYPES.includes(file.type as AllowedImageType)) {
+  const mediaType = inferImageMediaType(file);
+  if (!mediaType) {
     return Response.json({ error: "Solo se aceptan imagenes JPG, PNG o WEBP." }, { status: 400 });
   }
 
@@ -41,7 +41,6 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ error: "La imagen es demasiado grande. Maximo 4 MB." }, { status: 413 });
   }
 
-  const mediaType = file.type as AllowedImageType;
   const ruta = `${crypto.randomUUID()}.${getExtensionForMimeType(mediaType)}`;
 
   try {

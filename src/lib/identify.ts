@@ -1,14 +1,9 @@
 import type { Host, IdentifyOption, IdentifyResult } from "@/lib/types";
 import { HOSPEDEROS } from "@/lib/hosts";
 
-export const PROMPT_IDENTIFY = `Eres un botánico experto en el matorral chileno y el bosque esclerófilo.
+export const PROMPT_IDENTIFY = `Eres un botanico experto en el matorral chileno y el bosque esclerofilo.
 
-PASO 1 — Observación (texto libre, obligatorio antes del JSON):
-Describe brevemente lo que observas en la imagen: tipo de corteza del árbol hospedero,
-forma y color de sus hojas, hábitat visible. Si el hospedero no es visible o está muy
-tapado por el quintral, dilo explícitamente.
-
-PASO 2 — Responde SOLO con este JSON (sin texto adicional después):
+Responde SOLO con un objeto JSON valido, sin texto antes ni despues, usando exactamente este formato:
 {
   "esQuintral": boolean,
   "opciones": [
@@ -27,9 +22,9 @@ Reglas estrictas:
   quisco, quisco-coquimbano, quisco-litoralis, quisco-skottsbergii, quisquito, sauce, otro
 - "opciones" siempre tiene exactamente 2 entradas, ordenadas de mayor a menor confianza.
 - Usa "otro" SOLO si el hospedero es genuinamente irreconocible. Una confianza baja
-  (0.2–0.4) con nombre específico es preferible a "otro".
-- "confianza" es un número entre 0 y 1.
-- "notas" resume en una oración tu razonamiento del Paso 1.`;
+  (0.2-0.4) con nombre especifico es preferible a "otro".
+- "confianza" es un numero entre 0 y 1.
+- "notas" resume en una oracion breve tus observaciones visuales y razonamiento.`;
 
 function asObject(raw: unknown): Record<string, unknown> {
   return raw !== null && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
@@ -49,12 +44,56 @@ function toStr(value: unknown): string {
 }
 
 export function extractJson(text: string): unknown {
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start === -1 || end === -1 || end < start) return {};
+  const trimmed = text.trim();
+
   try {
-    return JSON.parse(text.slice(start, end + 1));
+    return JSON.parse(trimmed);
   } catch {
+    let start = -1;
+    let depth = 0;
+    let inString = false;
+    let escaped = false;
+
+    for (let i = 0; i < text.length; i += 1) {
+      const char = text[i];
+
+      if (inString) {
+        if (escaped) {
+          escaped = false;
+          continue;
+        }
+        if (char === "\\") {
+          escaped = true;
+          continue;
+        }
+        if (char === '"') inString = false;
+        continue;
+      }
+
+      if (char === '"') {
+        inString = true;
+        continue;
+      }
+
+      if (char === "{") {
+        if (depth === 0) start = i;
+        depth += 1;
+        continue;
+      }
+
+      if (char === "}" && depth > 0) {
+        depth -= 1;
+        if (depth === 0 && start !== -1) {
+          const candidate = text.slice(start, i + 1);
+          try {
+            return JSON.parse(candidate);
+          } catch {
+            start = -1;
+          }
+        }
+      }
+    }
+
     return {};
   }
 }
