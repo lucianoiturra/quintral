@@ -3,6 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { etiquetaHospedero, HOSPEDEROS } from "@/lib/hosts";
 import type { Host, Observation } from "@/lib/types";
+import {
+  buildAdminDashboardSummary,
+  type AdminStatusFilter,
+} from "@/app/admin/dashboard";
 
 type AdminLogEntry = {
   id: string;
@@ -11,8 +15,6 @@ type AdminLogEntry = {
   detalle: unknown;
   fecha: string;
 };
-
-type Filter = "todas" | "ocultas" | "verificadas";
 
 type EditForm = {
   hospedero: Host;
@@ -37,9 +39,10 @@ function toEditForm(observation: Observation): EditForm {
 export default function AdminPanel() {
   const [observations, setObservations] = useState<Observation[]>([]);
   const [logEntries, setLogEntries] = useState<AdminLogEntry[]>([]);
-  const [filter, setFilter] = useState<Filter>("todas");
-  const [hospederoFiltro, setHospederoFiltro] = useState<string>("todos");
+  const [filter, setFilter] = useState<AdminStatusFilter>("todas");
+  const [hospederoFiltro, setHospederoFiltro] = useState<Host | "todos">("todos");
   const [cerroFiltro, setCerroFiltro] = useState<string>("todos");
+  const [monthFiltro, setMonthFiltro] = useState<string>("todos");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<EditForm | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
@@ -177,13 +180,18 @@ export default function AdminPanel() {
     [observations],
   );
 
-  const visibles = observations.filter((observation) => {
-    if (filter === "ocultas" && !observation.oculta) return false;
-    if (filter === "verificadas" && !observation.verificada) return false;
-    if (hospederoFiltro !== "todos" && observation.hospedero !== hospederoFiltro) return false;
-    if (cerroFiltro !== "todos" && observation.cerro !== cerroFiltro) return false;
-    return true;
-  });
+  const summary = useMemo(
+    () =>
+      buildAdminDashboardSummary(observations, {
+        status: filter,
+        hospedero: hospederoFiltro,
+        cerro: cerroFiltro,
+        month: monthFiltro,
+      }),
+    [cerroFiltro, filter, hospederoFiltro, monthFiltro, observations],
+  );
+
+  const visibles = summary.filtered;
 
   return (
     <main className="section" style={{ paddingTop: "2rem" }}>
@@ -211,9 +219,102 @@ export default function AdminPanel() {
 
       {error ? <p className="alert alert--error">{error}</p> : null}
 
+      <section
+        className="rise"
+        style={{
+          padding: "1.5rem",
+          border: "1px solid var(--line-soft)",
+          borderRadius: "var(--r-lg)",
+          background:
+            "linear-gradient(135deg, oklch(0.995 0.004 95) 0%, oklch(0.975 0.012 110) 100%)",
+          boxShadow: "var(--shadow-sm)",
+          marginBottom: "1.5rem",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            gap: "1rem",
+            flexWrap: "wrap",
+            alignItems: "end",
+            marginBottom: "1rem",
+          }}
+        >
+          <div style={{ maxWidth: "60ch" }}>
+            <h2 style={{ fontSize: "1.45rem", marginBottom: "0.35rem" }}>Resumen del monitoreo</h2>
+            <p style={{ margin: 0, color: "var(--ink-soft)" }}>
+              Vista rápida del estado del banco de observaciones, con foco en temporada,
+              hospederos dominantes y ubicaciones con más actividad.
+            </p>
+          </div>
+          <label className="field" style={{ minWidth: 220 }}>
+            <span>Mes</span>
+            <select value={monthFiltro} onChange={(event) => setMonthFiltro(event.target.value)}>
+              <option value="todos">Todos los meses</option>
+              {summary.months.map((month) => (
+                <option key={month.value} value={month.value}>
+                  {month.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+            gap: "0.9rem",
+            marginBottom: "1.25rem",
+          }}
+        >
+          {summary.metrics.map((metric) => (
+            <div
+              key={metric.label}
+              style={{
+                padding: "1rem 1.05rem",
+                borderRadius: "var(--r-md)",
+                background: "oklch(1 0 0 / 0.72)",
+                border: "1px solid var(--line-soft)",
+              }}
+            >
+              <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "var(--ink-faint)" }}>
+                {metric.label}
+              </div>
+              <div style={{ fontSize: "2rem", lineHeight: 1.05, margin: "0.35rem 0 0.25rem" }}>
+                {metric.value}
+              </div>
+              <div style={{ fontSize: "0.88rem", color: "var(--ink-soft)" }}>{metric.hint}</div>
+            </div>
+          ))}
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: "1rem",
+          }}
+        >
+          <RankingPanel
+            title="Ranking de hospederos"
+            subtitle="Top segun la vista filtrada"
+            emptyLabel="No hay hospederos para este filtro."
+            bars={summary.hostRanking}
+          />
+          <RankingPanel
+            title="Ranking de ubicaciones"
+            subtitle="Usa el campo cerro como proxy de ciudad o zona"
+            emptyLabel="No hay ubicaciones para este filtro."
+            bars={summary.locationRanking}
+          />
+        </div>
+      </section>
+
       <section className="card card-pad rise" style={{ display: "grid", gap: "1rem" }}>
         <div className="pill-row">
-          {(["todas", "ocultas", "verificadas"] as Filter[]).map((item) => (
+          {(["todas", "ocultas", "verificadas"] as AdminStatusFilter[]).map((item) => (
             <button
               key={item}
               type="button"
@@ -225,7 +326,10 @@ export default function AdminPanel() {
               {item}
             </button>
           ))}
-          <select value={hospederoFiltro} onChange={(event) => setHospederoFiltro(event.target.value)}>
+          <select
+            value={hospederoFiltro}
+            onChange={(event) => setHospederoFiltro(event.target.value as Host | "todos")}
+          >
             <option value="todos">Hospedero: todos</option>
             {HOSPEDEROS.map((host) => (
               <option key={host} value={host}>
@@ -244,7 +348,7 @@ export default function AdminPanel() {
         </div>
 
         <p style={{ margin: 0, color: "var(--ink-soft)" }}>
-          {loading ? "Cargando..." : `${visibles.length} de ${observations.length} registros`}
+          {loading ? "Cargando..." : `${visibles.length} de ${observations.length} registros en la vista actual`}
         </p>
 
         <div style={{ overflowX: "auto" }}>
@@ -514,6 +618,80 @@ export default function AdminPanel() {
         </ul>
       </section>
     </main>
+  );
+}
+
+function RankingPanel({
+  title,
+  subtitle,
+  emptyLabel,
+  bars,
+}: {
+  title: string;
+  subtitle: string;
+  emptyLabel: string;
+  bars: Array<{ etiqueta: string; valor: number; color: string }>;
+}) {
+  const max = Math.max(...bars.map((bar) => bar.valor), 1);
+
+  return (
+    <div
+      style={{
+        padding: "1rem 1.05rem",
+        borderRadius: "var(--r-md)",
+        background: "oklch(1 0 0 / 0.62)",
+        border: "1px solid var(--line-soft)",
+      }}
+    >
+      <div style={{ marginBottom: "0.8rem" }}>
+        <h3 style={{ fontSize: "1.05rem", marginBottom: "0.2rem", fontFamily: "var(--font-sans)" }}>
+          {title}
+        </h3>
+        <p style={{ margin: 0, color: "var(--ink-soft)", fontSize: "0.9rem" }}>{subtitle}</p>
+      </div>
+
+      {bars.length === 0 ? (
+        <p style={{ margin: 0, color: "var(--ink-faint)" }}>{emptyLabel}</p>
+      ) : (
+        <div style={{ display: "grid", gap: "0.8rem" }}>
+          {bars.map((bar) => (
+            <div key={bar.etiqueta} style={{ display: "grid", gap: "0.25rem" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: "0.8rem",
+                  alignItems: "baseline",
+                }}
+              >
+                <span style={{ fontWeight: 600 }}>{bar.etiqueta}</span>
+                <span style={{ color: "var(--ink-soft)", fontVariantNumeric: "tabular-nums" }}>
+                  {bar.valor}
+                </span>
+              </div>
+              <div
+                aria-hidden="true"
+                style={{
+                  height: 10,
+                  borderRadius: 999,
+                  background: "var(--line-soft)",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    width: `${(bar.valor / max) * 100}%`,
+                    height: "100%",
+                    borderRadius: 999,
+                    background: bar.color,
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
