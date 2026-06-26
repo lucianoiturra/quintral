@@ -61,7 +61,11 @@ export default function AdminPanel() {
       if (!active) return;
 
       if (!obsResponse.ok || !logResponse.ok) {
-        setError("No se pudo cargar el panel admin.");
+        const [obsError, logError] = await Promise.all([
+          readErrorMessage(obsResponse, "No se pudo cargar observaciones."),
+          readErrorMessage(logResponse, "No se pudo cargar el historial admin."),
+        ]);
+        setError([obsError, logError].filter(Boolean).join(" | "));
         setLoading(false);
         return;
       }
@@ -98,7 +102,7 @@ export default function AdminPanel() {
     });
 
     if (!response.ok) {
-      setError("No se pudo actualizar la observacion.");
+      setError(await readErrorMessage(response, "No se pudo actualizar la observacion."));
       return null;
     }
 
@@ -146,7 +150,7 @@ export default function AdminPanel() {
   async function deleteObservation(id: string) {
     const response = await fetch(`/api/admin/observaciones/${id}`, { method: "DELETE" });
     if (!response.ok) {
-      setError("No se pudo borrar la observacion.");
+      setError(await readErrorMessage(response, "No se pudo borrar la observacion."));
       return;
     }
 
@@ -511,6 +515,19 @@ export default function AdminPanel() {
       </section>
     </main>
   );
+}
+
+async function readErrorMessage(response: Response, fallback: string): Promise<string> {
+  try {
+    const payload = (await response.json()) as { error?: unknown };
+    if (typeof payload.error === "string" && payload.error.trim()) {
+      return payload.error;
+    }
+  } catch {
+    return fallback;
+  }
+
+  return fallback;
 }
 
 const smallButton: React.CSSProperties = {
