@@ -5,6 +5,7 @@ import { etiquetaHospedero } from "@/lib/hosts";
 import { fileToBase64 } from "@/lib/fileToBase64";
 import { inferImageMediaType } from "@/lib/imageMime";
 import type { IdentifyResult } from "@/lib/types";
+import { ZONAS, type ZonaId } from "@/lib/zonas";
 
 export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill) => void }) {
   const [archivo, setArchivo] = useState<File | null>(null);
@@ -12,6 +13,7 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
   const [resultado, setResultado] = useState<IdentifyResult | null>(null);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [zonaId, setZonaId] = useState<ZonaId | "">("");
 
   useEffect(() => {
     if (!previa) return;
@@ -47,7 +49,11 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
       const res = await fetch("/api/identify", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ imageBase64: base64, mediaType }),
+        body: JSON.stringify({
+          imageBase64: base64,
+          mediaType,
+          ...(zonaId ? { zona: zonaId } : {}),
+        }),
       });
 
       if (!res.ok) {
@@ -120,6 +126,18 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
             Para mejor identificacion, enfoca las hojas y la corteza del arbol hospedero, no solo
             el quintral. Una foto cercana a las hojas es clave.
           </p>
+
+          <label className="identify-zona">
+            <span>¿Dónde se tomó la foto? (opcional — mejora la precisión)</span>
+            <select value={zonaId} onChange={(e) => setZonaId(e.target.value as ZonaId | "")}>
+              <option value="">No especificar</option>
+              {ZONAS.map((z) => (
+                <option key={z.id} value={z.id}>
+                  {z.etiqueta}
+                </option>
+              ))}
+            </select>
+          </label>
 
           <div className="identify-actions">
             <span className="identify-meta">Modelo Quintral v0.2 (demo)</span>
