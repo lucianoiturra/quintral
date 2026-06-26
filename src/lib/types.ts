@@ -1,4 +1,35 @@
-export type Host = "aromo" | "colliguay" | "litre" | "quillay" | "otro";
+export type Host =
+  | "alamo"
+  | "aromo"
+  | "arrayan"
+  | "barraco"
+  | "boldo"
+  | "chacay"
+  | "coihue"
+  | "colliguay"
+  | "corcolen"
+  | "crucero"
+  | "eulychnia-breviflora"
+  | "eulychnia-castanea"
+  | "huingan"
+  | "litre"
+  | "maqui"
+  | "maiten"
+  | "manzano"
+  | "nothofagus-nitida"
+  | "olivo"
+  | "peral"
+  | "peumo"
+  | "pingo-pingo"
+  | "platano-oriental"
+  | "quillay"
+  | "quisco"
+  | "quisco-coquimbano"
+  | "quisco-litoralis"
+  | "quisco-skottsbergii"
+  | "quisquito"
+  | "sauce"
+  | "otro";
 
 export interface Observation {
   id: string;
@@ -15,10 +46,14 @@ export interface Observation {
   creadoEn: string;
 }
 
+export interface IdentifyOption {
+  hospedero: Host;
+  confianza: number; // 0..1
+}
+
 export interface IdentifyResult {
   esQuintral: boolean;
-  hospederoProbable: Host;
-  confianza: number; // 0..1
+  opciones: [IdentifyOption, IdentifyOption]; // top 2, mayor confianza primero
   fenologia: string;
   notas: string;
 }
