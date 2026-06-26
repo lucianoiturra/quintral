@@ -17,6 +17,33 @@ const VACIO: FormState = {
   hospederoOtro: "", fenologia: "", altitud: "", exposicionSolar: "", cerro: "",
 };
 
+function mergePrefillIntoForm(current: FormState, prefill: Prefill): FormState {
+  const {
+    nombreObservador,
+    lat,
+    lng,
+    hospedero,
+    hospederoOtro,
+    fenologia,
+    altitud,
+    exposicionSolar,
+    cerro,
+  } = prefill;
+
+  return {
+    ...current,
+    ...(nombreObservador !== undefined ? { nombreObservador } : {}),
+    ...(lat !== undefined ? { lat } : {}),
+    ...(lng !== undefined ? { lng } : {}),
+    ...(hospedero !== undefined ? { hospedero } : {}),
+    ...(hospederoOtro !== undefined ? { hospederoOtro } : {}),
+    ...(fenologia !== undefined ? { fenologia } : {}),
+    ...(altitud !== undefined ? { altitud } : {}),
+    ...(exposicionSolar !== undefined ? { exposicionSolar } : {}),
+    ...(cerro !== undefined ? { cerro } : {}),
+  };
+}
+
 export default function ContributeForm({
   prefill,
   onCreated,
@@ -35,7 +62,7 @@ export default function ContributeForm({
   useEffect(() => {
     if (!prefill) return;
     setOk(false);
-    setForm((f) => ({ ...f, ...prefill }) as FormState);
+    setForm((f) => mergePrefillIntoForm(f, prefill));
     setFotoUrl(prefill.fotoUrl ?? null);
     setFotoArchivo(prefill.fotoArchivo ?? null);
     setResultadoIa(prefill.resultadoIa ?? null);

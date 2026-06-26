@@ -3,6 +3,7 @@ import { extractJson, parseIdentifyResult, PROMPT_IDENTIFY } from "@/lib/identif
 import {
   ALLOWED_IMAGE_TYPES,
   assertTrustedOrigin,
+  base64MatchesMediaType,
   enforceRateLimit,
   estimateDecodedBytes,
   isValidBase64,
@@ -45,6 +46,10 @@ export async function POST(request: Request): Promise<Response> {
 
   if (estimateDecodedBytes(normalizedBase64) > MAX_IMAGE_BYTES) {
     return Response.json({ error: "La imagen es demasiado grande. Maximo 4 MB." }, { status: 413 });
+  }
+
+  if (!base64MatchesMediaType(normalizedBase64, mediaType as AllowedImageType)) {
+    return Response.json({ error: "El contenido de la imagen no coincide con mediaType" }, { status: 400 });
   }
 
   try {

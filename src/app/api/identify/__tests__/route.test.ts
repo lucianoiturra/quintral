@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const createMock = vi.fn();
 vi.mock("@anthropic-ai/sdk", () => ({
@@ -9,6 +9,9 @@ vi.mock("@anthropic-ai/sdk", () => ({
 
 import { POST } from "@/app/api/identify/route";
 import { resetRateLimits } from "@/lib/server/rateLimit";
+
+const JPEG_BASE64 = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46]).toString("base64");
+const PNG_BASE64 = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).toString("base64");
 
 function req(body: unknown, headers?: Record<string, string>): Request {
   return new Request("http://localhost/api/identify", {
@@ -27,8 +30,12 @@ describe("POST /api/identify", () => {
   beforeEach(() => {
     createMock.mockReset();
     resetRateLimits();
-    process.env.ANTHROPIC_API_KEY = "test-key";
-    process.env.NODE_ENV = "test";
+    vi.stubEnv("ANTHROPIC_API_KEY", "test-key");
+    vi.stubEnv("NODE_ENV", "test");
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it("devuelve un IdentifyResult normalizado", async () => {
@@ -41,7 +48,7 @@ describe("POST /api/identify", () => {
       ],
     });
 
-    const res = await POST(req({ imageBase64: "AAAA", mediaType: "image/jpeg" }));
+    const res = await POST(req({ imageBase64: JPEG_BASE64, mediaType: "image/jpeg" }));
 
     expect(res.status).toBe(200);
     const data = await res.json();
@@ -58,12 +65,17 @@ describe("POST /api/identify", () => {
   });
 
   it("400 si el mediaType no esta en la lista permitida", async () => {
-    const res = await POST(req({ imageBase64: "AAAA", mediaType: "application/pdf" }));
+    const res = await POST(req({ imageBase64: JPEG_BASE64, mediaType: "application/pdf" }));
     expect(res.status).toBe(400);
   });
 
   it("400 si el base64 es invalido", async () => {
     const res = await POST(req({ imageBase64: "not-base64!!!", mediaType: "image/jpeg" }));
+    expect(res.status).toBe(400);
+  });
+
+  it("400 si la firma binaria no coincide con el mediaType declarado", async () => {
+    const res = await POST(req({ imageBase64: PNG_BASE64, mediaType: "image/jpeg" }));
     expect(res.status).toBe(400);
   });
 
@@ -79,17 +91,17 @@ describe("POST /api/identify", () => {
     });
 
     for (let attempt = 0; attempt < 10; attempt += 1) {
-      const res = await POST(req({ imageBase64: "AAAA", mediaType: "image/jpeg" }));
+      const res = await POST(req({ imageBase64: JPEG_BASE64, mediaType: "image/jpeg" }));
       expect(res.status).toBe(200);
     }
 
-    const blocked = await POST(req({ imageBase64: "AAAA", mediaType: "image/jpeg" }));
+    const blocked = await POST(req({ imageBase64: JPEG_BASE64, mediaType: "image/jpeg" }));
     expect(blocked.status).toBe(429);
   });
 
   it("500 si la IA falla", async () => {
     createMock.mockRejectedValue(new Error("boom"));
-    const res = await POST(req({ imageBase64: "AAAA", mediaType: "image/jpeg" }));
+    const res = await POST(req({ imageBase64: JPEG_BASE64, mediaType: "image/jpeg" }));
     expect(res.status).toBe(500);
   });
 });
