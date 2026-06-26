@@ -732,6 +732,13 @@ label.inline {
   gap: 0.6rem;
 }
 
+.identify-hint {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin-top: 0.75rem;
+  line-height: 1.5;
+}
+
 .result {
   display: flex;
   flex-direction: column;
@@ -776,6 +783,27 @@ label.inline {
 .result-host {
   color: var(--ink-soft);
   font-size: 0.95rem;
+}
+
+.result-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.result-options-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.1rem;
+}
+
+.result-option {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
 }
 
 .result-conf-head {
