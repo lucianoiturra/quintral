@@ -1,16 +1,35 @@
-import type { Host, IdentifyResult } from "@/lib/types";
+import type { Host, IdentifyOption, IdentifyResult } from "@/lib/types";
 import { HOSPEDEROS } from "@/lib/hosts";
 
-export const PROMPT_IDENTIFY = `Eres un asistente de botánica para un proyecto sobre el quintral chileno (Tristerix corymbosus), una planta hemiparásita.
-Analiza la foto y responde SOLO con un objeto JSON, sin texto adicional, con esta forma exacta:
+export const PROMPT_IDENTIFY = `Eres un botánico experto en el matorral chileno y el bosque esclerófilo.
+
+PASO 1 — Observación (texto libre, obligatorio antes del JSON):
+Describe brevemente lo que observas en la imagen: tipo de corteza del árbol hospedero,
+forma y color de sus hojas, hábitat visible. Si el hospedero no es visible o está muy
+tapado por el quintral, dilo explícitamente.
+
+PASO 2 — Responde SOLO con este JSON (sin texto adicional después):
 {
-  "esQuintral": boolean,            // ¿se ve quintral en la foto?
-  "hospederoProbable": string,      // uno de: aromo, colliguay, litre, quillay, otro
-  "confianza": number,              // entre 0 y 1
-  "fenologia": string,              // estado del ejemplar: "en flor", "con frutos", "vegetativo", etc.
-  "notas": string                   // observación breve en español
+  "esQuintral": boolean,
+  "opciones": [
+    { "hospedero": string, "confianza": number },
+    { "hospedero": string, "confianza": number }
+  ],
+  "fenologia": string,
+  "notas": string
 }
-Si no estás seguro del hospedero, usa "otro" y baja la confianza.`;
+
+Reglas estrictas:
+- "hospedero" debe ser EXACTAMENTE uno de estos valores (sin variantes):
+  alamo, aromo, arrayan, barraco, boldo, chacay, coihue, colliguay, corcolen, crucero,
+  eulychnia-breviflora, eulychnia-castanea, huingan, litre, maqui, maiten, manzano,
+  nothofagus-nitida, olivo, peral, peumo, pingo-pingo, platano-oriental, quillay,
+  quisco, quisco-coquimbano, quisco-litoralis, quisco-skottsbergii, quisquito, sauce, otro
+- "opciones" siempre tiene exactamente 2 entradas, ordenadas de mayor a menor confianza.
+- Usa "otro" SOLO si el hospedero es genuinamente irreconocible. Una confianza baja
+  (0.2–0.4) con nombre específico es preferible a "otro".
+- "confianza" es un número entre 0 y 1.
+- "notas" resume en una oración tu razonamiento del Paso 1.`;
 
 function asObject(raw: unknown): Record<string, unknown> {
   return raw !== null && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
@@ -40,12 +59,25 @@ export function extractJson(text: string): unknown {
   }
 }
 
-export function parseIdentifyResult(raw: unknown): IdentifyResult {
+const FALLBACK_OPTION: IdentifyOption = { hospedero: "otro", confianza: 0 };
+
+function toIdentifyOption(raw: unknown): IdentifyOption {
   const o = asObject(raw);
   return {
-    esQuintral: o.esQuintral === true,
-    hospederoProbable: toHost(o.hospederoProbable),
+    hospedero: toHost(o.hospedero),
     confianza: toConfidence(o.confianza),
+  };
+}
+
+export function parseIdentifyResult(raw: unknown): IdentifyResult {
+  const o = asObject(raw);
+  const rawOpciones = Array.isArray(o.opciones) ? o.opciones : [];
+  return {
+    esQuintral: o.esQuintral === true,
+    opciones: [
+      rawOpciones[0] !== undefined ? toIdentifyOption(rawOpciones[0]) : FALLBACK_OPTION,
+      rawOpciones[1] !== undefined ? toIdentifyOption(rawOpciones[1]) : FALLBACK_OPTION,
+    ],
     fenologia: toStr(o.fenologia),
     notas: toStr(o.notas),
   };
