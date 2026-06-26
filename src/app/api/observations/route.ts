@@ -44,9 +44,19 @@ export async function POST(request: Request): Promise<Response> {
       .select("*")
       .single();
 
-    if (error) throw error;
+    if (error) {
+      return Response.json(
+        { error: `No se pudo guardar la observacion: ${error.message}` },
+        { status: 500 },
+      );
+    }
+
     return Response.json(data, { status: 201 });
-  } catch {
-    return Response.json({ error: "No se pudo guardar la observacion." }, { status: 500 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Error desconocido";
+    return Response.json(
+      { error: `No se pudo guardar la observacion: ${message}` },
+      { status: 500 },
+    );
   }
 }
