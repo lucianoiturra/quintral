@@ -2,7 +2,7 @@
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import type { Host, Observation } from "@/lib/types";
-import { HOSPEDEROS, etiquetaHospedero, colorHospedero } from "@/lib/hosts";
+import { etiquetaHospedero, colorHospedero } from "@/lib/hosts";
 import { filterObservations } from "@/lib/filterObservations";
 
 const MapaQuintral = dynamic(() => import("@/components/MapaQuintral"), { ssr: false });
@@ -13,6 +13,10 @@ export default function MapSection({ observations }: { observations: Observation
 
   const cerros = useMemo(
     () => Array.from(new Set(observations.map((o) => o.cerro).filter(Boolean))) as string[],
+    [observations],
+  );
+  const hospederosConDatos = useMemo(
+    () => Array.from(new Set(observations.map((o) => o.hospedero))),
     [observations],
   );
   const visibles = useMemo(
@@ -69,7 +73,7 @@ export default function MapSection({ observations }: { observations: Observation
               >
                 Todos
               </button>
-              {HOSPEDEROS.map((h) => (
+              {hospederosConDatos.map((h) => (
                 <button
                   key={h}
                   type="button"
