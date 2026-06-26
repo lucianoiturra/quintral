@@ -968,7 +968,8 @@ label.inline {
 
 @media (max-width: 860px) {
   .identify-grid,
-  .contribute-grid {
+  .contribute-grid,
+  .chart-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -1109,8 +1110,3 @@ label.inline {
   align-content: start;
 }
 
-@media (max-width: 860px) {
-  .chart-grid {
-    grid-template-columns: 1fr;
-  }
-}
