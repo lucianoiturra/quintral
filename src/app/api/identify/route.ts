@@ -1,25 +1,50 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { parseIdentifyResult, extractJson, PROMPT_IDENTIFY } from "@/lib/identify";
+import { extractJson, parseIdentifyResult, PROMPT_IDENTIFY } from "@/lib/identify";
+import {
+  ALLOWED_IMAGE_TYPES,
+  assertTrustedOrigin,
+  enforceRateLimit,
+  estimateDecodedBytes,
+  isValidBase64,
+  normalizeBase64,
+  readJsonBody,
+  type AllowedImageType,
+} from "@/lib/server/requestSecurity";
 
 export const runtime = "nodejs";
 
-export async function POST(request: Request): Promise<Response> {
-  let body: { imageBase64?: string; mediaType?: string };
-  try {
-    body = await request.json();
-  } catch {
-    return Response.json({ error: "JSON inválido" }, { status: 400 });
-  }
+const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+const MAX_JSON_BYTES = 6 * 1024 * 1024;
 
-  const { imageBase64, mediaType } = body;
+export async function POST(request: Request): Promise<Response> {
+  const originError = assertTrustedOrigin(request);
+  if (originError) return originError;
+
+  const rateLimitError = enforceRateLimit(request, "identify", 10, 60_000);
+  if (rateLimitError) return rateLimitError;
+
+  const parsed = await readJsonBody<{ imageBase64?: string; mediaType?: string }>(
+    request,
+    MAX_JSON_BYTES,
+  );
+  if (!parsed.ok) return parsed.response;
+
+  const { imageBase64, mediaType } = parsed.value;
   if (!imageBase64 || !mediaType) {
     return Response.json({ error: "Falta la imagen" }, { status: 400 });
   }
 
-  const ALLOWED_MEDIA_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"] as const;
-  type AllowedMediaType = (typeof ALLOWED_MEDIA_TYPES)[number];
-  if (!ALLOWED_MEDIA_TYPES.includes(mediaType as AllowedMediaType)) {
+  if (!ALLOWED_IMAGE_TYPES.includes(mediaType as AllowedImageType)) {
     return Response.json({ error: "mediaType no soportado" }, { status: 400 });
+  }
+
+  const normalizedBase64 = normalizeBase64(imageBase64);
+  if (!isValidBase64(normalizedBase64)) {
+    return Response.json({ error: "La imagen no esta en base64 valido" }, { status: 400 });
+  }
+
+  if (estimateDecodedBytes(normalizedBase64) > MAX_IMAGE_BYTES) {
+    return Response.json({ error: "La imagen es demasiado grande. Maximo 4 MB." }, { status: 413 });
   }
 
   try {
@@ -35,8 +60,8 @@ export async function POST(request: Request): Promise<Response> {
               type: "image",
               source: {
                 type: "base64",
-                media_type: mediaType as AllowedMediaType,
-                data: imageBase64,
+                media_type: mediaType as AllowedImageType,
+                data: normalizedBase64,
               },
             },
             { type: "text", text: PROMPT_IDENTIFY },
@@ -45,10 +70,10 @@ export async function POST(request: Request): Promise<Response> {
       ],
     });
 
-    const textBlock = response.content.find((b) => b.type === "text");
+    const textBlock = response.content.find((block) => block.type === "text");
     const text = textBlock && textBlock.type === "text" ? textBlock.text : "";
     return Response.json(parseIdentifyResult(extractJson(text)));
   } catch {
-    return Response.json({ error: "Falló el análisis de la imagen" }, { status: 500 });
+    return Response.json({ error: "Fallo el analisis de la imagen" }, { status: 500 });
   }
 }

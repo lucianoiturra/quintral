@@ -1,6 +1,7 @@
-import type { Host, Observation } from "@/lib/types";
+import type { Observation } from "@/lib/types";
 import { HOSPEDEROS } from "@/lib/hosts";
 import { getSupabase } from "@/lib/supabase";
+import type { ObservationInput } from "@/lib/observationPayload";
 
 export interface ObservacionRow {
   id: string;
@@ -18,23 +19,11 @@ export interface ObservacionRow {
   creado_en: string;
 }
 
-export interface NewObservation {
-  nombreObservador: string;
-  lat: number;
-  lng: number;
-  hospedero: Host;
-  hospederoOtro: string | null;
-  fenologia: string;
-  altitud: number | null;
-  exposicionSolar: string | null;
-  fotoUrl: string | null;
-  resultadoIa: unknown;
-  cerro: string | null;
-}
+export type NewObservation = ObservationInput;
 
 export function mapRowToObservation(row: ObservacionRow): Observation {
-  const hospedero = HOSPEDEROS.includes(row.hospedero as Host)
-    ? (row.hospedero as Host)
+  const hospedero = HOSPEDEROS.includes(row.hospedero as Observation["hospedero"])
+    ? (row.hospedero as Observation["hospedero"])
     : "otro";
   return {
     id: row.id,
@@ -62,24 +51,32 @@ export async function fetchObservations(): Promise<Observation[]> {
 }
 
 export async function createObservation(input: NewObservation): Promise<Observation> {
-  const { data, error } = await getSupabase()
-    .from("observaciones")
-    .insert({
-      nombre_observador: input.nombreObservador,
-      lat: input.lat,
-      lng: input.lng,
-      hospedero: input.hospedero,
-      hospedero_otro: input.hospederoOtro,
-      fenologia: input.fenologia,
-      altitud: input.altitud,
-      exposicion_solar: input.exposicionSolar,
-      foto_url: input.fotoUrl,
-      resultado_ia: input.resultadoIa,
-      cerro: input.cerro,
-    })
-    .select("*")
-    .single();
-  if (error) throw new Error(error.message);
-  if (!data) throw new Error("No se recibió dato al crear la observación");
-  return mapRowToObservation(data as ObservacionRow);
+  const res = await fetch("/api/observations", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(input),
+  });
+
+  const payload = (await res.json().catch(() => null)) as
+    | ObservacionRow
+    | { error?: string; errors?: string[] }
+    | null;
+
+  if (!res.ok) {
+    if (payload && "errors" in payload && Array.isArray(payload.errors) && payload.errors.length > 0) {
+      throw new Error(payload.errors.join(" "));
+    }
+
+    throw new Error(
+      payload && "error" in payload && typeof payload.error === "string"
+        ? payload.error
+        : "Error al guardar la observacion.",
+    );
+  }
+
+  if (!payload || !("id" in payload)) {
+    throw new Error("No se recibio dato al crear la observacion");
+  }
+
+  return mapRowToObservation(payload);
 }

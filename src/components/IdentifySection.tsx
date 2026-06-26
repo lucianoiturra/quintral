@@ -1,10 +1,12 @@
 "use client";
 import { useState } from "react";
-import type { IdentifyResult } from "@/lib/types";
+import type { Prefill } from "@/components/ContributeForm";
 import { etiquetaHospedero } from "@/lib/hosts";
 import { fileToBase64 } from "@/lib/fileToBase64";
+import type { IdentifyResult } from "@/lib/types";
 import { uploadFoto } from "@/lib/uploadFoto";
-import type { Prefill } from "@/components/ContributeForm";
+
+const TIPOS_PERMITIDOS = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill) => void }) {
   const [archivo, setArchivo] = useState<File | null>(null);
@@ -14,36 +16,50 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  function elegir(f: File | null) {
-    setArchivo(f);
+  function elegir(file: File | null) {
+    setArchivo(file);
     setResultado(null);
     setFotoUrl(null);
     setError(null);
-    setPrevia(f ? URL.createObjectURL(f) : null);
+    setPrevia(file ? URL.createObjectURL(file) : null);
   }
 
   async function analizar() {
     if (!archivo) return;
-    if (archivo.size > 4 * 1024 * 1024) {
-      setError("La imagen es demasiado grande. Máximo 4 MB.");
+
+    if (!TIPOS_PERMITIDOS.has(archivo.type)) {
+      setError("Solo se permiten imagenes JPG, PNG o WEBP.");
       return;
     }
+
+    if (archivo.size > 4 * 1024 * 1024) {
+      setError("La imagen es demasiado grande. Maximo 4 MB.");
+      return;
+    }
+
     setCargando(true);
     setError(null);
     setResultado(null);
+
     try {
       const url = await uploadFoto(archivo);
       setFotoUrl(url);
+
       const { base64, mediaType } = await fileToBase64(archivo);
       const res = await fetch("/api/identify", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ imageBase64: base64, mediaType }),
       });
-      if (!res.ok) throw new Error("La IA no pudo analizar la imagen.");
+
+      if (!res.ok) {
+        const payload = (await res.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error ?? "La IA no pudo analizar la imagen.");
+      }
+
       setResultado((await res.json()) as IdentifyResult);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Error al analizar.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al analizar.");
     } finally {
       setCargando(false);
     }
@@ -60,27 +76,26 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
         : {}),
       fotoUrl,
     });
+
     document.getElementById("aportar")?.scrollIntoView({ behavior: "smooth" });
   }
 
   return (
     <section id="identificar" className="section">
       <div className="section-head">
-        <p className="kicker" data-num="01">Visión por computador</p>
-        <h2>Identificación automática con IA</h2>
-        <p>
-          Sube una fotografía del ejemplar. El modelo estima especie, hospedero
-          probable y fenología.
+        <p className="kicker" data-num="01">
+          Vision por computador
         </p>
+        <h2>Identificacion automatica con IA</h2>
+        <p>Sube una fotografia del ejemplar. El modelo estima especie, hospedero probable y fenologia.</p>
       </div>
 
       <div className="identify-grid">
-        {/* — Columna de subida — */}
         <div className="card card-pad">
           <label className="dropzone">
             <input
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp"
               onChange={(e) => elegir(e.target.files?.[0] ?? null)}
               hidden
             />
@@ -98,49 +113,48 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
                   />
                 </svg>
                 <strong>Haz clic para subir una foto</strong>
-                <small>JPG · PNG, hasta 4 MB</small>
+                <small>JPG, PNG o WEBP, hasta 4 MB</small>
               </span>
             )}
           </label>
 
           <p className="identify-hint">
-            Para mejor identificación, enfoca las hojas y la corteza del árbol hospedero,
-            no solo el quintral. Una foto cercana a las hojas es clave.
+            Para mejor identificacion, enfoca las hojas y la corteza del arbol hospedero, no solo
+            el quintral. Una foto cercana a las hojas es clave.
           </p>
 
           <div className="identify-actions">
-            <span className="identify-meta">Modelo Quintral&nbsp;v0.2 (demo)</span>
+            <span className="identify-meta">Modelo Quintral v0.2 (demo)</span>
             <div className="identify-buttons">
-              {archivo && (
+              {archivo ? (
                 <button type="button" className="btn btn--ghost" onClick={() => elegir(null)}>
                   Limpiar
                 </button>
-              )}
+              ) : null}
               <button
                 type="button"
                 className="btn btn--primary"
                 onClick={analizar}
                 disabled={!archivo || cargando}
               >
-                {cargando ? "Analizando…" : "Analizar"}
+                {cargando ? "Analizando..." : "Analizar"}
               </button>
             </div>
           </div>
         </div>
 
-        {/* — Columna de resultado — */}
         <div className="card card-pad result">
-          <h3 className="result-title">Resultado del análisis</h3>
-          {error && <p className="alert alert--error">{error}</p>}
+          <h3 className="result-title">Resultado del analisis</h3>
+          {error ? <p className="alert alert--error">{error}</p> : null}
 
-          {!resultado && !error && (
+          {!resultado && !error ? (
             <p className="result-empty">
-              Sube una imagen para evaluar el ejemplar y obtener los hospederos
-              más probables, la confianza del modelo y notas de campo.
+              Sube una imagen para evaluar el ejemplar y obtener los hospederos mas probables, la
+              confianza del modelo y notas de campo.
             </p>
-          )}
+          ) : null}
 
-          {resultado && (
+          {resultado ? (
             <>
               <div className="result-verdict">
                 <span className={`badge ${resultado.esQuintral ? "badge--yes" : "badge--maybe"}`}>
@@ -149,14 +163,14 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
               </div>
 
               <div className="result-options">
-                <p className="result-options-label">Hospederos más probables</p>
-                {resultado.opciones.map((op, i) => {
-                  const pct = Math.round(op.confianza * 100);
+                <p className="result-options-label">Hospederos mas probables</p>
+                {resultado.opciones.map((opcion, index) => {
+                  const pct = Math.round(opcion.confianza * 100);
                   return (
-                    <div key={op.hospedero + i} className="result-option">
+                    <div key={opcion.hospedero + index} className="result-option">
                       <div className="result-conf-head">
                         <span>
-                          <strong>{i + 1}º</strong> {etiquetaHospedero(op.hospedero)}
+                          <strong>{index + 1}o</strong> {etiquetaHospedero(opcion.hospedero)}
                         </span>
                         <strong>{pct}%</strong>
                       </div>
@@ -167,7 +181,7 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
                         aria-valuemin={0}
                         aria-valuemax={100}
                       >
-                        <span style={{ transform: `scaleX(${op.confianza})` }} />
+                        <span style={{ transform: `scaleX(${opcion.confianza})` }} />
                       </div>
                     </div>
                   );
@@ -176,28 +190,28 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
 
               <dl className="result-data">
                 <div>
-                  <dt>Fenología</dt>
-                  <dd>{resultado.fenologia || "—"}</dd>
+                  <dt>Fenologia</dt>
+                  <dd>{resultado.fenologia || "-"}</dd>
                 </div>
                 <div>
                   <dt>Notas</dt>
-                  <dd>{resultado.notas || "—"}</dd>
+                  <dd>{resultado.notas || "-"}</dd>
                 </div>
               </dl>
 
-              {resultado.opciones[0].confianza < 0.4 && (
+              {resultado.opciones[0].confianza < 0.4 ? (
                 <p className="alert alert--error">
                   Baja confianza: confirma el hospedero a mano en el formulario.
                 </p>
-              )}
+              ) : null}
             </>
-          )}
+          ) : null}
 
-          {(resultado || fotoUrl) && (
+          {resultado || fotoUrl ? (
             <button type="button" className="btn btn--forest result-cta" onClick={agregarAlMapa}>
               {resultado ? "Agregar al mapa" : "Agregar foto al mapa manualmente"}
             </button>
-          )}
+          ) : null}
         </div>
       </div>
     </section>
