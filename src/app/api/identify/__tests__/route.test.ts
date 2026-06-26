@@ -28,14 +28,14 @@ describe("POST /api/identify", () => {
       content: [
         {
           type: "text",
-          text: 'Aquí está: {"esQuintral": true, "hospederoProbable": "quillay", "confianza": 0.9, "fenologia": "en flor", "notas": "ok"}',
+          text: 'Aquí está: {"esQuintral": true, "opciones": [{"hospedero": "quillay", "confianza": 0.9}, {"hospedero": "litre", "confianza": 0.4}], "fenologia": "en flor", "notas": "ok"}',
         },
       ],
     });
     const res = await POST(req({ imageBase64: "AAAA", mediaType: "image/jpeg" }));
     expect(res.status).toBe(200);
     const data = await res.json();
-    expect(data.hospederoProbable).toBe("quillay");
+    expect(data.opciones[0].hospedero).toBe("quillay");
     expect(data.esQuintral).toBe(true);
   });
 
