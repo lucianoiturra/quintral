@@ -19,7 +19,7 @@ export default function PrediccionSection() {
 
   return (
     <section id="predecir" className="section--tint">
-      <div className="section-inner">
+      <div className="section section-inner">
         <div className="section-head">
           <p className="kicker" data-num="04">
             Estimación

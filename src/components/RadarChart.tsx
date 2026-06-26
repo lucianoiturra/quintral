@@ -58,17 +58,39 @@ export default function RadarChart({ ejes, series, size = 320 }: RadarChartProps
         );
       })}
 
-      {series.map((s) => (
-        <polygon
-          key={s.nombre}
-          className="radar-serie"
-          points={s.valores.map((v, i) => punto(i, v ?? 0).join(",")).join(" ")}
-          fill={s.color}
-          fillOpacity={0.18}
-          stroke={s.color}
-          strokeWidth={2}
-        />
-      ))}
+      {series.map((s) => {
+        const pts = s.valores.map((v, i) => punto(i, v ?? 0));
+        const n2 = s.valores.length;
+        return (
+          <g key={s.nombre}>
+            {/* Fill polygon — always solid, collapses to center for null */}
+            <polygon
+              points={pts.map((p) => p.join(",")).join(" ")}
+              fill={s.color}
+              fillOpacity={0.18}
+              stroke="none"
+            />
+            {/* Per-segment stroke: dashed when either endpoint is null */}
+            {pts.map((p, i) => {
+              const next = pts[(i + 1) % n2];
+              const hasNull =
+                s.valores[i] === null || s.valores[(i + 1) % n2] === null;
+              return (
+                <line
+                  key={i}
+                  x1={p[0]}
+                  y1={p[1]}
+                  x2={next[0]}
+                  y2={next[1]}
+                  stroke={s.color}
+                  strokeWidth={2}
+                  strokeDasharray={hasNull ? "4 3" : undefined}
+                />
+              );
+            })}
+          </g>
+        );
+      })}
     </svg>
   );
 }
