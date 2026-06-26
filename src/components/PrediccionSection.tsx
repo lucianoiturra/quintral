@@ -19,7 +19,7 @@ export default function PrediccionSection() {
 
   return (
     <section id="predecir" className="section--tint">
-      <div className="section section-inner">
+      <div className="section-inner">
         <div className="section-head">
           <p className="kicker" data-num="04">
             Estimación
@@ -63,7 +63,7 @@ export default function PrediccionSection() {
               />
             </label>
 
-            <button type="submit" className="btn btn--primary contribute-submit">
+            <button type="submit" className="btn btn--primary">
               Ver perfil de referencia
             </button>
           </form>
