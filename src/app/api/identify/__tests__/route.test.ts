@@ -28,7 +28,7 @@ describe("POST /api/identify", () => {
       content: [
         {
           type: "text",
-          text: 'Aquí está: {"esQuintral": true, "opciones": [{"hospedero": "quillay", "confianza": 0.9}, {"hospedero": "litre", "confianza": 0.4}], "fenologia": "en flor", "notas": "ok"}',
+          text: 'Aquí está: {"esQuintral": true, "opciones": [{"hospedero": "quillay", "confianza": 0.9}, {"hospedero": "litre", "confianza": 0.5}], "fenologia": "en flor", "notas": "ok"}',
         },
       ],
     });
@@ -37,6 +37,9 @@ describe("POST /api/identify", () => {
     const data = await res.json();
     expect(data.opciones[0].hospedero).toBe("quillay");
     expect(data.esQuintral).toBe(true);
+    expect(data.opciones[0].confianza).toBe(0.9);
+    expect(data.opciones[1].hospedero).toBe("litre");
+    expect(data.opciones[1].confianza).toBe(0.5);
   });
 
   it("400 si falta la imagen", async () => {
