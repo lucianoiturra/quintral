@@ -25,6 +25,7 @@ export default function MapaQuintral({ observations }: { observations: Observati
             pathOptions={{
               color: colorHospedero(observation.hospedero),
               fillOpacity: 0.8,
+              weight: observation.verificada ? 3 : 1,
             }}
           >
             <Popup>
@@ -33,6 +34,12 @@ export default function MapaQuintral({ observations }: { observations: Observati
               {observation.fenologia || "sin fenologia"}
               <br />
               {observation.cerro ?? "sin cerro"} · {observation.nombreObservador}
+              {observation.verificada ? (
+                <>
+                  <br />
+                  <span style={{ color: "#1d7c45", fontWeight: 700 }}>Verificado</span>
+                </>
+              ) : null}
               {fotoSegura ? (
                 <>
                   <br />

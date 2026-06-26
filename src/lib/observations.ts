@@ -17,6 +17,10 @@ export interface ObservacionRow {
   resultado_ia: unknown;
   cerro: string | null;
   creado_en: string;
+  oculta: boolean;
+  verificada: boolean;
+  notas_admin: string | null;
+  editado_en: string | null;
 }
 
 export type NewObservation = ObservationInput;
@@ -38,6 +42,10 @@ export function mapRowToObservation(row: ObservacionRow): Observation {
     fotoUrl: row.foto_url,
     cerro: row.cerro,
     creadoEn: row.creado_en,
+    oculta: row.oculta,
+    verificada: row.verificada,
+    notasAdmin: row.notas_admin,
+    editadoEn: row.editado_en,
   };
 }
 
@@ -45,6 +53,7 @@ export async function fetchObservations(): Promise<Observation[]> {
   const { data, error } = await getSupabase()
     .from("observaciones")
     .select("*")
+    .eq("oculta", false)
     .order("creado_en", { ascending: false });
   if (error) throw new Error(error.message);
   return ((data ?? []) as ObservacionRow[]).map(mapRowToObservation);

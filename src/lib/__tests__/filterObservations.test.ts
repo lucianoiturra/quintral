@@ -6,7 +6,9 @@ function obs(p: Partial<Observation>): Observation {
   return {
     id: "x", nombreObservador: "a", lat: 0, lng: 0, hospedero: "quillay",
     hospederoOtro: null, fenologia: "", altitud: null, exposicionSolar: null,
-    fotoUrl: null, cerro: "Manquehue", creadoEn: "", ...p,
+    fotoUrl: null, cerro: "Manquehue", creadoEn: "",
+    oculta: false, verificada: false, notasAdmin: null, editadoEn: null,
+    ...p,
   };
 }
 

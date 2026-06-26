@@ -44,6 +44,10 @@ export interface Observation {
   fotoUrl: string | null;
   cerro: string | null;
   creadoEn: string;
+  oculta: boolean;
+  verificada: boolean;
+  notasAdmin: string | null;
+  editadoEn: string | null;
 }
 
 export interface IdentifyOption {
