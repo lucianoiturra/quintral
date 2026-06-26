@@ -1,4 +1,5 @@
 import type { Host, IdentifyOption, IdentifyResult } from "@/lib/types";
+import type { Zona } from "@/lib/zonas";
 import { HOSPEDEROS } from "@/lib/hosts";
 
 export const PROMPT_IDENTIFY = `Eres un botanico experto en el matorral chileno y el bosque esclerofilo.
@@ -120,4 +121,15 @@ export function parseIdentifyResult(raw: unknown): IdentifyResult {
     fenologia: toStr(o.fenologia),
     notas: toStr(o.notas),
   };
+}
+
+export function construirPrompt(zona?: Zona): string {
+  if (!zona) return PROMPT_IDENTIFY;
+  const bloque = `Contexto geográfico: la foto fue tomada en ${zona.etiqueta}. ${zona.pista}
+Usa la distribución conocida de cada especie en Chile: reduce la confianza de especies que no
+crecen en esa zona. No la elimines del todo si la imagen lo sugiere fuertemente, pero prioriza
+las plausibles para la zona.
+
+`;
+  return bloque + PROMPT_IDENTIFY;
 }

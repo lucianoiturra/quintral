@@ -85,3 +85,22 @@ describe("parseIdentifyResult", () => {
     expect(parseIdentifyResult("texto").esQuintral).toBe(false);
   });
 });
+
+import { construirPrompt, PROMPT_IDENTIFY } from "@/lib/identify";
+import { ZONAS } from "@/lib/zonas";
+
+describe("construirPrompt", () => {
+  it("sin zona devuelve el prompt base sin cambios", () => {
+    expect(construirPrompt()).toBe(PROMPT_IDENTIFY);
+  });
+
+  it("con zona antepone un bloque con la etiqueta y la pista", () => {
+    const centro = ZONAS.find((z) => z.id === "centro")!;
+    const prompt = construirPrompt(centro);
+    expect(prompt).toContain(centro.etiqueta);
+    expect(prompt).toContain(centro.pista);
+    expect(prompt).toContain(PROMPT_IDENTIFY);
+    // el bloque geográfico va antes del prompt base
+    expect(prompt.indexOf(centro.etiqueta)).toBeLessThan(prompt.indexOf(PROMPT_IDENTIFY));
+  });
+});
