@@ -20,7 +20,7 @@ describe("parseIdentifyResult", () => {
   });
 
   it("mapea hospedero desconocido a 'otro'", () => {
-    const r = parseIdentifyResult({ hospederoProbable: "boldo" });
+    const r = parseIdentifyResult({ hospederoProbable: "arbol-inexistente" });
     expect(r.hospederoProbable).toBe("otro");
   });
 
