@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { extractJson, parseIdentifyResult, PROMPT_IDENTIFY } from "@/lib/identify";
+import { zonaPorId } from "@/lib/zonas";
 import {
   ALLOWED_IMAGE_TYPES,
   assertTrustedOrigin,
@@ -24,13 +25,13 @@ export async function POST(request: Request): Promise<Response> {
   const rateLimitError = enforceRateLimit(request, "identify", 10, 60_000);
   if (rateLimitError) return rateLimitError;
 
-  const parsed = await readJsonBody<{ imageBase64?: string; mediaType?: string }>(
+  const parsed = await readJsonBody<{ imageBase64?: string; mediaType?: string; zona?: string }>(
     request,
     MAX_JSON_BYTES,
   );
   if (!parsed.ok) return parsed.response;
 
-  const { imageBase64, mediaType } = parsed.value;
+  const { imageBase64, mediaType, zona: zonaId } = parsed.value;
   if (!imageBase64 || !mediaType) {
     return Response.json({ error: "Falta la imagen" }, { status: 400 });
   }
@@ -53,7 +54,15 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
+    const zona = zonaId ? zonaPorId(zonaId) : undefined;
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+    // Construir prompt con contexto geográfico si hay zona
+    let prompt = PROMPT_IDENTIFY;
+    if (zona) {
+      prompt = `${PROMPT_IDENTIFY}\n\nContexto geográfico: ${zona.etiqueta}. ${zona.pista}`;
+    }
+
     const response = await client.messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 1024,
@@ -69,7 +78,7 @@ export async function POST(request: Request): Promise<Response> {
                 data: normalizedBase64,
               },
             },
-            { type: "text", text: PROMPT_IDENTIFY },
+            { type: "text", text: prompt },
           ],
         },
       ],

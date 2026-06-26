@@ -104,4 +104,21 @@ describe("POST /api/identify", () => {
     const res = await POST(req({ imageBase64: JPEG_BASE64, mediaType: "image/jpeg" }));
     expect(res.status).toBe(500);
   });
+
+  it("pasa la zona resuelta a la IA cuando es válida", async () => {
+    createMock.mockResolvedValue({ content: [{ type: "text", text: "{}" }] });
+    await POST(req({ imageBase64: JPEG_BASE64, mediaType: "image/jpeg", zona: "centro" }));
+    const arg = createMock.mock.calls[0][0];
+    const textBlock = arg.messages[0].content.find((b: { type: string }) => b.type === "text");
+    expect(textBlock.text).toContain("Chile central");
+  });
+
+  it("ignora una zona inválida sin romper (200)", async () => {
+    createMock.mockResolvedValue({ content: [{ type: "text", text: "{}" }] });
+    const res = await POST(req({ imageBase64: JPEG_BASE64, mediaType: "image/jpeg", zona: "marte" }));
+    expect(res.status).toBe(200);
+    const arg = createMock.mock.calls[0][0];
+    const textBlock = arg.messages[0].content.find((b: { type: string }) => b.type === "text");
+    expect(textBlock.text).not.toContain("Contexto geográfico");
+  });
 });
