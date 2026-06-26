@@ -53,7 +53,7 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
     onPrefill({
       ...(resultado
         ? {
-            hospedero: resultado.hospederoProbable,
+            hospedero: resultado.opciones[0].hospedero,
             fenologia: resultado.fenologia,
             resultadoIa: resultado,
           }
@@ -62,8 +62,6 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
     });
     document.getElementById("aportar")?.scrollIntoView({ behavior: "smooth" });
   }
-
-  const conf = resultado ? Math.round(resultado.confianza * 100) : 0;
 
   return (
     <section id="identificar" className="section">
@@ -105,8 +103,13 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
             )}
           </label>
 
+          <p className="identify-hint">
+            Para mejor identificación, enfoca las hojas y la corteza del árbol hospedero,
+            no solo el quintral. Una foto cercana a las hojas es clave.
+          </p>
+
           <div className="identify-actions">
-            <span className="identify-meta">Modelo Quintral&nbsp;v0.1 (demo)</span>
+            <span className="identify-meta">Modelo Quintral&nbsp;v0.2 (demo)</span>
             <div className="identify-buttons">
               {archivo && (
                 <button type="button" className="btn btn--ghost" onClick={() => elegir(null)}>
@@ -132,8 +135,8 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
 
           {!resultado && !error && (
             <p className="result-empty">
-              Sube una imagen para evaluar el ejemplar y obtener el hospedero
-              probable, la confianza del modelo y notas de campo.
+              Sube una imagen para evaluar el ejemplar y obtener los hospederos
+              más probables, la confianza del modelo y notas de campo.
             </p>
           )}
 
@@ -143,19 +146,32 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
                 <span className={`badge ${resultado.esQuintral ? "badge--yes" : "badge--maybe"}`}>
                   {resultado.esQuintral ? "Es quintral" : "Sin certeza"}
                 </span>
-                <span className="result-host">
-                  Hospedero: <strong>{etiquetaHospedero(resultado.hospederoProbable)}</strong>
-                </span>
               </div>
 
-              <div className="result-conf">
-                <div className="result-conf-head">
-                  <span>Confianza del modelo</span>
-                  <strong>{conf}%</strong>
-                </div>
-                <div className="meter" role="meter" aria-valuenow={conf} aria-valuemin={0} aria-valuemax={100}>
-                  <span style={{ transform: `scaleX(${conf / 100})` }} />
-                </div>
+              <div className="result-options">
+                <p className="result-options-label">Hospederos más probables</p>
+                {resultado.opciones.map((op, i) => {
+                  const pct = Math.round(op.confianza * 100);
+                  return (
+                    <div key={op.hospedero + i} className="result-option">
+                      <div className="result-conf-head">
+                        <span>
+                          <strong>{i + 1}º</strong> {etiquetaHospedero(op.hospedero)}
+                        </span>
+                        <strong>{pct}%</strong>
+                      </div>
+                      <div
+                        className="meter"
+                        role="meter"
+                        aria-valuenow={pct}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                      >
+                        <span style={{ transform: `scaleX(${op.confianza})` }} />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
               <dl className="result-data">
@@ -169,7 +185,7 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
                 </div>
               </dl>
 
-              {resultado.confianza < 0.5 && (
+              {resultado.opciones[0].confianza < 0.4 && (
                 <p className="alert alert--error">
                   Baja confianza: confirma el hospedero a mano en el formulario.
                 </p>
