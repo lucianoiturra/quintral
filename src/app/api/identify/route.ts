@@ -5,6 +5,7 @@ import {
   ALLOWED_IMAGE_TYPES,
   assertTrustedOrigin,
   enforceRateLimit,
+  estimateDecodedBytes,
   readJsonBody,
   type AllowedImageType,
 } from "@/lib/server/requestSecurity";
@@ -40,6 +41,12 @@ export async function POST(request: Request): Promise<Response> {
   );
   if (!tiposOk) {
     return Response.json({ error: "mediaType no soportado" }, { status: 400 });
+  }
+
+  const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+  const tooBig = imagenes.some((i) => estimateDecodedBytes(i.base64) > MAX_IMAGE_BYTES);
+  if (tooBig) {
+    return Response.json({ error: "Una o más imágenes superan el máximo de 4 MB" }, { status: 413 });
   }
 
   try {

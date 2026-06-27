@@ -28,6 +28,19 @@ export default function RanurasFotos({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    setPrevias((current) => {
+      const next = { ...current };
+      for (const key of Object.keys(current) as EtiquetaFoto[]) {
+        if (archivos[key] === null && current[key] !== null) {
+          URL.revokeObjectURL(current[key]!);
+          next[key] = null;
+        }
+      }
+      return next;
+    });
+  }, [archivos]);
+
   function elegir(etiqueta: EtiquetaFoto, file: File | null) {
     if (file) {
       if (!TIPOS_PERMITIDOS.has(file.type)) {

@@ -138,10 +138,17 @@ async function main() {
       lng: it.lng,
     }));
 
+    const multiMap = new Map(
+      manifestMulti.items.map((it) => [it.archivos[0], it])
+    );
+
     const resultado = await evaluarManifiesto(itemsAdaptados, (item) => {
-      const original = manifestMulti.items.find((m) => m.archivos[0] === item.archivo)!;
+      const original = multiMap.get(item.archivo);
+      if (!original) throw new Error(`Item no encontrado en manifestMulti: ${item.archivo}`);
       return identificarItemMulti(original);
     });
+
+    resultado.modo = sinZona ? "multi-sinzona" : "multi";
 
     fs.mkdirSync(RESULTS_DIR, { recursive: true });
     const sufijo = sinZona ? "multi-sinzona" : "multi";
