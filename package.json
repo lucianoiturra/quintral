@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "vitest run"
+    "test": "vitest run",
+    "eval:fetch": "tsx scripts/eval/fetch-dataset.ts",
+    "eval:run": "tsx scripts/eval/run-eval.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.105.0",
@@ -25,6 +27,7 @@
     "@types/react": "^19.2.17",
     "@vitejs/plugin-react": "^6.0.3",
     "jsdom": "^29.1.1",
+    "tsx": "^4.22.4",
     "typescript": "^6.0.3",
     "vitest": "^4.1.9"
   }
