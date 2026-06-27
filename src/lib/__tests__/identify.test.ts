@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { extractJson, parseIdentifyResult } from "@/lib/identify";
+import { extractJson, parseIdentifyResult, notaMultiFoto } from "@/lib/identify";
 
 describe("extractJson", () => {
   it("parsea JSON puro directamente", () => {
@@ -102,5 +102,17 @@ describe("construirPrompt", () => {
     expect(prompt).toContain(PROMPT_IDENTIFY);
     // el bloque geográfico va antes del prompt base
     expect(prompt.indexOf(centro.etiqueta)).toBeLessThan(prompt.indexOf(PROMPT_IDENTIFY));
+  });
+});
+
+describe("notaMultiFoto", () => {
+  it("vacío con 0 o 1 imagen", () => {
+    expect(notaMultiFoto([])).toBe("");
+    expect(notaMultiFoto([{}])).toBe("");
+  });
+  it("con 2+ imágenes menciona el mismo árbol y el número", () => {
+    const nota = notaMultiFoto([{ etiqueta: "corteza" }, { etiqueta: "hoja" }]);
+    expect(nota).toContain("MISMO árbol");
+    expect(nota).toContain("2");
   });
 });

@@ -1,5 +1,6 @@
 import type { Host, IdentifyOption, IdentifyResult } from "@/lib/types";
 import type { Zona } from "@/lib/zonas";
+import type { EtiquetaFoto } from "@/lib/imagenes";
 import { HOSPEDEROS } from "@/lib/hosts";
 
 export const PROMPT_IDENTIFY = `Eres un botanico experto en el matorral chileno y el bosque esclerofilo.
@@ -132,4 +133,9 @@ las plausibles para la zona.
 
 `;
   return bloque + PROMPT_IDENTIFY;
+}
+
+export function notaMultiFoto(imagenes: { etiqueta?: EtiquetaFoto }[]): string {
+  if (imagenes.length <= 1) return "";
+  return `Te muestro ${imagenes.length} fotografías del MISMO árbol hospedero (distintas vistas). Identifícalo combinando la información de todas.`;
 }
