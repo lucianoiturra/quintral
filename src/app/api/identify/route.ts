@@ -1,21 +1,17 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { construirPrompt, extractJson, parseIdentifyResult } from "@/lib/identify";
+import { identificarHospedero } from "@/lib/identifyClient";
+import type { ImagenEntrada } from "@/lib/imagenes";
 import { zonaPorId } from "@/lib/zonas";
 import {
   ALLOWED_IMAGE_TYPES,
   assertTrustedOrigin,
-  base64MatchesMediaType,
   enforceRateLimit,
-  estimateDecodedBytes,
-  isValidBase64,
-  normalizeBase64,
   readJsonBody,
   type AllowedImageType,
 } from "@/lib/server/requestSecurity";
 
 export const runtime = "nodejs";
 
-const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+const MAX_IMAGENES = 4;
 const MAX_JSON_BYTES = 6 * 1024 * 1024;
 
 export async function POST(request: Request): Promise<Response> {
@@ -25,64 +21,31 @@ export async function POST(request: Request): Promise<Response> {
   const rateLimitError = enforceRateLimit(request, "identify", 10, 60_000);
   if (rateLimitError) return rateLimitError;
 
-  const parsed = await readJsonBody<{ imageBase64?: string; mediaType?: string; zona?: string }>(
+  const parsed = await readJsonBody<{ imagenes?: ImagenEntrada[]; zona?: string }>(
     request,
     MAX_JSON_BYTES,
   );
   if (!parsed.ok) return parsed.response;
 
-  const { imageBase64, mediaType, zona: zonaId } = parsed.value;
-  if (!imageBase64 || !mediaType) {
+  const imagenes = Array.isArray(parsed.value.imagenes)
+    ? parsed.value.imagenes.slice(0, MAX_IMAGENES)
+    : [];
+
+  if (imagenes.length === 0) {
     return Response.json({ error: "Falta la imagen" }, { status: 400 });
   }
 
-  if (!ALLOWED_IMAGE_TYPES.includes(mediaType as AllowedImageType)) {
+  const tiposOk = imagenes.every((i) =>
+    ALLOWED_IMAGE_TYPES.includes(i.mediaType as AllowedImageType),
+  );
+  if (!tiposOk) {
     return Response.json({ error: "mediaType no soportado" }, { status: 400 });
   }
 
-  const normalizedBase64 = normalizeBase64(imageBase64);
-  if (!isValidBase64(normalizedBase64)) {
-    return Response.json({ error: "La imagen no esta en base64 valido" }, { status: 400 });
-  }
-
-  if (estimateDecodedBytes(normalizedBase64) > MAX_IMAGE_BYTES) {
-    return Response.json({ error: "La imagen es demasiado grande. Maximo 4 MB." }, { status: 413 });
-  }
-
-  if (!base64MatchesMediaType(normalizedBase64, mediaType as AllowedImageType)) {
-    return Response.json({ error: "El contenido de la imagen no coincide con mediaType" }, { status: 400 });
-  }
-
   try {
-    const zona = zonaId ? zonaPorId(zonaId) : undefined;
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
-    const prompt = construirPrompt(zona);
-
-    const response = await client.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 1024,
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "image",
-              source: {
-                type: "base64",
-                media_type: mediaType as AllowedImageType,
-                data: normalizedBase64,
-              },
-            },
-            { type: "text", text: prompt },
-          ],
-        },
-      ],
-    });
-
-    const textBlock = response.content.find((block) => block.type === "text");
-    const text = textBlock && textBlock.type === "text" ? textBlock.text : "";
-    return Response.json(parseIdentifyResult(extractJson(text)));
+    const zona = parsed.value.zona ? zonaPorId(parsed.value.zona) : undefined;
+    const resultado = await identificarHospedero(imagenes, zona);
+    return Response.json(resultado);
   } catch {
     return Response.json({ error: "Fallo el analisis de la imagen" }, { status: 500 });
   }
