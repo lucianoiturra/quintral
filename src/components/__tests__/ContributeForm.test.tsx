@@ -1,6 +1,14 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ContributeForm from "@/components/ContributeForm";
+import type { PendingPayload } from "@/lib/offline/types";
+
+type OnQueueArg = {
+  payload: PendingPayload;
+  fotoBlob: Blob | null;
+  altitudGps: number | null;
+  precision: number | null;
+};
 
 describe("ContributeForm (offline-first)", () => {
   beforeEach(() => {
@@ -23,7 +31,7 @@ describe("ContributeForm (offline-first)", () => {
   });
 
   it("encola la observación al enviar (no la sube directo)", async () => {
-    const onQueue = vi.fn(async () => {});
+    const onQueue = vi.fn<(arg: OnQueueArg) => Promise<void>>(async () => {});
     render(<ContributeForm prefill={null} onQueue={onQueue} />);
     fireEvent.change(screen.getByPlaceholderText("Tu nombre"), { target: { value: "Ana" } });
     fireEvent.click(screen.getByText("Usar mi ubicación"));
