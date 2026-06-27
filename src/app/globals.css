@@ -405,6 +405,7 @@ label.inline {
    ============================================================ */
 
 .nav {
+  position: -webkit-sticky;
   position: sticky;
   top: 0;
   z-index: var(--z-sticky);
@@ -483,9 +484,94 @@ label.inline {
   transform: scaleX(1);
 }
 
-@media (max-width: 560px) {
-  .nav-links a:nth-child(n + 3) {
+/* Hamburguesa */
+
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  background: transparent;
+  border: none;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.16s var(--ease-out);
+}
+
+.nav-toggle:hover {
+  background: oklch(0.31 0.045 158 / 0.06);
+}
+
+.nav-toggle-bar {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--ink);
+  border-radius: 1px;
+  transition: transform 0.22s var(--ease-out), opacity 0.18s var(--ease-out);
+}
+
+.nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+@media (max-width: 768px) {
+  .nav-toggle {
+    display: inline-flex;
+  }
+
+  .nav-links {
     display: none;
+  }
+
+  .nav-links--open {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line-soft);
+    box-shadow: var(--shadow-md);
+    padding: 0.25rem 0;
+    z-index: var(--z-sticky);
+  }
+
+  .nav-links--open a {
+    padding: 0.9rem clamp(1.25rem, 0.5rem + 3vw, 2.5rem);
+    font-size: 1rem;
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .nav-links--open a:last-child {
+    border-bottom: none;
+  }
+
+  .nav-links--open a::after {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 960px) {
+  .nav-links {
+    gap: 0.85rem;
+    font-size: 0.88rem;
   }
 }
 
@@ -652,6 +738,18 @@ label.inline {
   }
   .footer-col--brand {
     grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-inner {
+    grid-template-columns: 1fr;
+  }
+  .footer-col--brand {
+    grid-column: 1;
+  }
+  .footer {
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }
 
@@ -864,6 +962,77 @@ label.inline {
   align-self: flex-start;
 }
 
+/* Zona / select de identificación */
+
+.identify-zona {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.85rem;
+}
+
+.identify-zona > span {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  letter-spacing: 0.02em;
+}
+
+/* ============================================================
+   RanurasFotos: cuatro vistas guiadas
+   ============================================================ */
+
+.ranuras-fotos {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.ranura {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ranura-titulo {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  text-align: center;
+}
+
+.dropzone--mini {
+  min-height: 88px;
+}
+
+.dropzone--mini .dropzone-preview {
+  height: 88px;
+}
+
+.ranura .btn {
+  font-size: 0.72rem;
+  padding: 0.28em 0.5em;
+  width: 100%;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .ranuras-fotos {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+  }
+
+  .dropzone--mini {
+    min-height: 112px;
+  }
+
+  .dropzone--mini .dropzone-preview {
+    height: 112px;
+  }
+}
+
 /* ============================================================
    Sección: Mapa
    ============================================================ */
@@ -896,6 +1065,7 @@ label.inline {
   overflow: hidden;
   border: 1px solid var(--line);
   box-shadow: var(--shadow-md);
+  height: 480px;
 }
 
 .map-frame .leaflet-container {
@@ -1136,5 +1306,79 @@ label.inline {
   display: grid;
   gap: 1rem;
   align-content: start;
+}
+
+/* ============================================================
+   Responsivo: ajustes móvil / tablet
+   ============================================================ */
+
+/* Hero: CTAs en columna en pantallas muy pequeñas */
+@media (max-width: 480px) {
+  .hero-cta {
+    flex-direction: column;
+  }
+
+  .hero-cta .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Mapa: filtros en columna en móvil */
+@media (max-width: 640px) {
+  .filter-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .filter-label {
+    min-width: unset;
+  }
+
+  .map-frame {
+    height: 340px;
+  }
+}
+
+/* Formulario aportar: botón GPS ancho completo en móvil */
+@media (max-width: 480px) {
+  .field-gps {
+    width: 100%;
+  }
+}
+
+/* Tabla de datos: scroll horizontal en móvil */
+@media (max-width: 640px) {
+  .data-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Acciones de identificación: stack vertical en móvil */
+@media (max-width: 480px) {
+  .identify-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .identify-buttons {
+    display: flex;
+    gap: 0.6rem;
+  }
+
+  .identify-buttons .btn {
+    flex: 1;
+  }
+}
+
+/* Sección: padding menor en móvil extremo */
+@media (max-width: 360px) {
+  .section {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 }
 

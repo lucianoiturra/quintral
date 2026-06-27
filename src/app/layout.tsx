@@ -1,5 +1,5 @@
 import "./globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Spectral, Hanken_Grotesk } from "next/font/google";
 
 const spectral = Spectral({
@@ -15,6 +15,12 @@ const hanken = Hanken_Grotesk({
   variable: "--font-sans",
   display: "swap",
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   title: "Quintral Insight — Ciencia abierta del bosque esclerófilo",
