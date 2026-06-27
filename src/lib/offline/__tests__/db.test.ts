@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import "fake-indexeddb/auto";
 import { addPending, listPending, updatePending, removePending } from "@/lib/offline/db";
 import type { PendingPayload } from "@/lib/offline/types";
@@ -47,8 +47,11 @@ describe("cola de observaciones pendientes", () => {
   });
 
   it("ordena por fecha de creación ascendente", async () => {
+    let t = Date.now();
+    vi.spyOn(Date, "now").mockImplementation(() => t++);
     const a = await addPending({ payload, fotoBlob: null, altitudGps: null, precision: null });
     const b = await addPending({ payload, fotoBlob: null, altitudGps: null, precision: null });
+    vi.restoreAllMocks();
     const lista = await listPending();
     expect(lista.map((p) => p.id)).toEqual([a.id, b.id]);
   });
