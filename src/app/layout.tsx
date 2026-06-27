@@ -20,12 +20,14 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  themeColor: "#0f1f14",
 };
 
 export const metadata: Metadata = {
   title: "Quintral Insight — Ciencia abierta del bosque esclerófilo",
   description:
     "Identificación con IA, mapa georreferenciado y ciencia ciudadana sobre el quintral (Tristerix corymbosus) y sus árboles hospederos en Chile.",
+  manifest: "/manifest.webmanifest",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

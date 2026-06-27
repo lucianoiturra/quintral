@@ -1409,3 +1409,7 @@ label.inline {
 .pending-state { color: #6b7280; }
 .pending-state--error { color: #b91c1c; }
 .pending-state--subiendo { color: #2563eb; }
+
+/* Guía de preparación offline */
+.prep-offline { margin-bottom: 1rem; }
+.prep-list { margin: 0.5rem 0 0.75rem; padding-left: 1.1rem; display: grid; gap: 0.25rem; font-size: 0.9rem; }

@@ -4,6 +4,7 @@ import type { Host } from "@/lib/types";
 import { HOSPEDEROS, etiquetaHospedero } from "@/lib/hosts";
 import { validateObservation, type FormState } from "@/lib/validateObservation";
 import type { PendingPayload } from "@/lib/offline/types";
+import PrepOffline from "@/components/PrepOffline";
 
 export interface Prefill extends Partial<FormState> {
   fotoUrl?: string | null;
@@ -146,6 +147,7 @@ export default function ContributeForm({
 
       <div className="contribute-grid">
         <form className="card card-pad contribute-form" onSubmit={enviar}>
+          <PrepOffline />
           {(fotoUrl || fotoArchivo) && (
             <p className="contribute-attached">
               <span className="dot" style={{ background: "var(--forest-bright)" }} />
