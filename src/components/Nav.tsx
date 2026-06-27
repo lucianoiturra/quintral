@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import ConnectionBadge from "@/components/ConnectionBadge";
 
 export default function Nav() {
   const [open, setOpen] = useState(false);
@@ -49,6 +50,7 @@ export default function Nav() {
           <a href="#predecir" onClick={() => setOpen(false)}>Predicción</a>
           <a href="#aportar" onClick={() => setOpen(false)}>Ciencia ciudadana</a>
         </div>
+        <ConnectionBadge />
       </div>
 
     </nav>
