@@ -1,10 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import type { Host, Observation } from "@/lib/types";
+import type { Host } from "@/lib/types";
 import { HOSPEDEROS, etiquetaHospedero } from "@/lib/hosts";
 import { validateObservation, type FormState } from "@/lib/validateObservation";
-import { createObservation } from "@/lib/observations";
-import { uploadFoto } from "@/lib/uploadFoto";
+import type { PendingPayload } from "@/lib/offline/types";
 
 export interface Prefill extends Partial<FormState> {
   fotoUrl?: string | null;
@@ -46,15 +45,22 @@ function mergePrefillIntoForm(current: FormState, prefill: Prefill): FormState {
 
 export default function ContributeForm({
   prefill,
-  onCreated,
+  onQueue,
 }: {
   prefill: Prefill | null;
-  onCreated: (o: Observation) => void;
+  onQueue: (entrada: {
+    payload: PendingPayload;
+    fotoBlob: Blob | null;
+    altitudGps: number | null;
+    precision: number | null;
+  }) => Promise<void>;
 }) {
   const [form, setForm] = useState<FormState>(VACIO);
   const [fotoUrl, setFotoUrl] = useState<string | null>(null);
   const [fotoArchivo, setFotoArchivo] = useState<File | null>(null);
   const [resultadoIa, setResultadoIa] = useState<unknown>(null);
+  const [altitudGps, setAltitudGps] = useState<number | null>(null);
+  const [precision, setPrecision] = useState<number | null>(null);
   const [errores, setErrores] = useState<string[]>([]);
   const [enviando, setEnviando] = useState(false);
   const [ok, setOk] = useState(false);
@@ -77,6 +83,12 @@ export default function ContributeForm({
       (pos) => {
         set("lat", String(pos.coords.latitude));
         set("lng", String(pos.coords.longitude));
+        if (typeof pos.coords.altitude === "number" && Number.isFinite(pos.coords.altitude)) {
+          const alt = Math.round(pos.coords.altitude);
+          setAltitudGps(alt);
+          set("altitud", String(alt));
+        }
+        setPrecision(typeof pos.coords.accuracy === "number" ? Math.round(pos.coords.accuracy) : null);
       },
       () => setErrores((prev) => [...prev, "No se pudo obtener la ubicación; ingrésala manualmente."]),
     );
@@ -90,26 +102,30 @@ export default function ContributeForm({
     if (errs.length) return;
     setEnviando(true);
     try {
-      const finalFotoUrl = fotoUrl ?? (fotoArchivo ? await uploadFoto(fotoArchivo) : null);
-      const o = await createObservation({
+      const payload: PendingPayload = {
         nombreObservador: form.nombreObservador.trim(),
         lat: Number(form.lat),
         lng: Number(form.lng),
         hospedero: form.hospedero,
         hospederoOtro: form.hospedero === "otro" ? form.hospederoOtro.trim() : null,
         fenologia: form.fenologia.trim(),
-        altitud: form.altitud.trim() ? Number(form.altitud) : null,
         exposicionSolar: form.exposicionSolar.trim() || null,
-        fotoUrl: finalFotoUrl,
         resultadoIa,
         cerro: form.cerro.trim() || null,
+      };
+      await onQueue({
+        payload,
+        fotoBlob: fotoArchivo,
+        altitudGps: form.altitud.trim() ? Number(form.altitud) : altitudGps,
+        precision,
       });
-      onCreated(o);
       setOk(true);
       setForm(VACIO);
       setFotoUrl(null);
       setFotoArchivo(null);
       setResultadoIa(null);
+      setAltitudGps(null);
+      setPrecision(null);
     } catch (err) {
       setErrores([err instanceof Error ? err.message : "Error al guardar el registro."]);
     } finally {
@@ -214,7 +230,11 @@ export default function ContributeForm({
           {errores.length > 0 && (
             <ul className="error-list">{errores.map((er) => <li key={er}>{er}</li>)}</ul>
           )}
-          {ok && <p className="alert alert--ok">¡Registro agregado al mapa!</p>}
+          {ok && (
+            <p className="alert alert--ok">
+              ✓ Guardado en tu teléfono. Sin señal se subirá al volver la conexión.
+            </p>
+          )}
 
           <button type="submit" className="btn btn--primary contribute-submit" disabled={enviando}>
             {enviando ? "Enviando…" : "Enviar observación"}
