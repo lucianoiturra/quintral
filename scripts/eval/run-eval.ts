@@ -12,7 +12,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import type { ManifestItem } from "@/lib/evalTypes";
+import type { ManifestItem, ManifestMulti, ManifestMultiItem } from "@/lib/evalTypes";
 import type { AllowedImageType } from "@/lib/imageMime";
 import type { IdentifyResult } from "@/lib/types";
 import { identificarHospedero } from "@/lib/identifyClient";
@@ -109,6 +109,51 @@ export async function evaluarManifiesto(
 
 async function main() {
   const sinZona = process.argv.includes("--sin-zona");
+  const multi = process.argv.includes("--multi");
+
+  if (multi) {
+    const mPath = path.join(DATASET_DIR, "manifestMulti.json");
+    if (!fs.existsSync(mPath)) {
+      console.error("No existe data/eval/manifestMulti.json. Corre primero: npm run eval:fetch");
+      process.exit(1);
+    }
+    const manifestMulti = JSON.parse(fs.readFileSync(mPath, "utf-8")) as ManifestMulti;
+
+    const identificarItemMulti = async (item: ManifestMultiItem): Promise<IdentifyResult> => {
+      const imagenes = item.archivos.map((archivo) => ({
+        base64: fs.readFileSync(path.join(DATASET_DIR, archivo)).toString("base64"),
+        mediaType: mediaTypePorExtension(archivo),
+      }));
+      const zona =
+        !sinZona && typeof item.lat === "number" ? zonaPorLatitud(item.lat) : undefined;
+      return identificarHospedero(imagenes, zona);
+    };
+
+    // Adapt multi items to ManifestItem shape for evaluarManifiesto
+    const itemsAdaptados: ManifestItem[] = manifestMulti.items.map((it) => ({
+      archivo: it.archivos[0],
+      hospedero: it.hospedero,
+      fuente: it.fuente,
+      lat: it.lat,
+      lng: it.lng,
+    }));
+
+    const resultado = await evaluarManifiesto(itemsAdaptados, (item) => {
+      const original = manifestMulti.items.find((m) => m.archivos[0] === item.archivo)!;
+      return identificarItemMulti(original);
+    });
+
+    fs.mkdirSync(RESULTS_DIR, { recursive: true });
+    const sufijo = sinZona ? "multi-sinzona" : "multi";
+    const salida = path.join(RESULTS_DIR, `${selloDeTiempo()}-${sufijo}.json`);
+    fs.writeFileSync(salida, JSON.stringify(resultado, null, 2));
+    console.log(`\nTotal evaluado (multi): ${resultado.total}`);
+    console.log(`Acierto top-1: ${(resultado.aciertoTop1 * 100).toFixed(1)}%`);
+    console.log(`Acierto top-2: ${(resultado.aciertoTop2 * 100).toFixed(1)}%`);
+    console.log(`Modo: MULTI ${sinZona ? "(sin zona)" : "(con zona)"}`);
+    console.log(`Resultado escrito en ${salida}`);
+    return;
+  }
 
   // Cargar manifiesto
   const manifestPath = path.join(DATASET_DIR, "manifest.json");
@@ -130,7 +175,10 @@ async function main() {
     const base64 = fs.readFileSync(ruta).toString("base64");
     const zona =
       !sinZona && typeof item.lat === "number" ? zonaPorLatitud(item.lat) : undefined;
-    return identificarHospedero(base64, mediaTypePorExtension(item.archivo), zona);
+    return identificarHospedero(
+      [{ base64, mediaType: mediaTypePorExtension(item.archivo) }],
+      zona,
+    );
   };
 
   console.log(`Evaluando ${items.length} imágenes… modo: ${sinZona ? "SIN zona (baseline)" : "CON zona"}`);
