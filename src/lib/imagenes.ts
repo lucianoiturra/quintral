@@ -1,10 +1,10 @@
-import type { AllowedMediaType } from "@/lib/identifyClient";
+import type { AllowedImageType } from "@/lib/imageMime";
 
 export type EtiquetaFoto = "corteza" | "hoja" | "arbol" | "fruto";
 
 export interface ImagenEntrada {
   base64: string;
-  mediaType: AllowedMediaType;
+  mediaType: AllowedImageType;
   etiqueta?: EtiquetaFoto;
 }
 
