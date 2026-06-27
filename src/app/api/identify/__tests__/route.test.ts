@@ -111,6 +111,7 @@ describe("POST /api/identify", () => {
     const arg = createMock.mock.calls[0][0];
     const textBlock = arg.messages[0].content.find((b: { type: string }) => b.type === "text");
     expect(textBlock.text).toContain("Chile central");
+    expect(textBlock.text).toContain("Usa la distribución");
   });
 
   it("ignora una zona inválida sin romper (200)", async () => {

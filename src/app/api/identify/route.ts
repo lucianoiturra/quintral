@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { extractJson, parseIdentifyResult, PROMPT_IDENTIFY } from "@/lib/identify";
+import { construirPrompt, extractJson, parseIdentifyResult } from "@/lib/identify";
 import { zonaPorId } from "@/lib/zonas";
 import {
   ALLOWED_IMAGE_TYPES,
@@ -57,11 +57,7 @@ export async function POST(request: Request): Promise<Response> {
     const zona = zonaId ? zonaPorId(zonaId) : undefined;
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-    // Construir prompt con contexto geográfico si hay zona
-    let prompt = PROMPT_IDENTIFY;
-    if (zona) {
-      prompt = `${PROMPT_IDENTIFY}\n\nContexto geográfico: ${zona.etiqueta}. ${zona.pista}`;
-    }
+    const prompt = construirPrompt(zona);
 
     const response = await client.messages.create({
       model: "claude-sonnet-4-6",
