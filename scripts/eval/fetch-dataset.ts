@@ -8,8 +8,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import https from "node:https";
-import { urlsDeFotos, type INatObservation } from "./inaturalist";
-import type { ManifestItem } from "@/lib/evalTypes";
+import { urlsDeFotos, gruposDeFotos, type INatObservation } from "./inaturalist";
+import type { ManifestItem, ManifestMulti, ManifestMultiItem } from "@/lib/evalTypes";
 import type { Host } from "@/lib/types";
 
 const ESPECIES: { slug: Host; taxonId: number }[] = [
@@ -21,8 +21,10 @@ const ESPECIES: { slug: Host; taxonId: number }[] = [
 ];
 
 const MAX_POR_ESPECIE = 20;
+const FOTOS_POR_OBS = 3;
 const OUT_DIR = path.resolve("data/eval/fotos");
 const MANIFEST_PATH = path.resolve("data/eval/manifest.json");
+const MANIFEST_MULTI_PATH = path.resolve("data/eval/manifestMulti.json");
 
 function get(url: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -60,6 +62,7 @@ async function fetchObservaciones(taxonId: number): Promise<INatObservation[]> {
 async function main() {
   fs.mkdirSync(OUT_DIR, { recursive: true });
   const items: ManifestItem[] = [];
+  const itemsMulti: ManifestMultiItem[] = [];
 
   for (const especie of ESPECIES) {
     console.log(`Fetching ${especie.slug} (taxon ${especie.taxonId})…`);
@@ -89,10 +92,43 @@ async function main() {
         lng: foto.lng,
       });
     }
+
+    const grupos = gruposDeFotos(observaciones, MAX_POR_ESPECIE, FOTOS_POR_OBS).filter(
+      (g) => g.urls.length >= 2,
+    );
+    for (const g of grupos) {
+      const archivos: string[] = [];
+      for (let i = 0; i < g.urls.length; i++) {
+        const archivoRel = `fotos/${especie.slug}-${g.id}-${i}.jpg`;
+        const dest = path.join(OUT_DIR, `${especie.slug}-${g.id}-${i}.jpg`);
+        if (!fs.existsSync(dest)) {
+          try {
+            await downloadFile(g.urls[i], dest);
+          } catch (err) {
+            console.warn(`  Skip multi ${archivoRel}: ${err}`);
+            continue;
+          }
+        }
+        archivos.push(archivoRel);
+      }
+      if (archivos.length >= 2) {
+        itemsMulti.push({
+          archivos,
+          hospedero: especie.slug,
+          fuente: g.fuente,
+          lat: g.lat,
+          lng: g.lng,
+        });
+      }
+    }
   }
 
   fs.writeFileSync(MANIFEST_PATH, JSON.stringify(items, null, 2));
   console.log(`Manifest escrito: ${items.length} fotos → ${MANIFEST_PATH}`);
+
+  const manifestMulti: ManifestMulti = { generadoEl: new Date().toISOString(), items: itemsMulti };
+  fs.writeFileSync(MANIFEST_MULTI_PATH, JSON.stringify(manifestMulti, null, 2));
+  console.log(`Manifiesto múltiple: ${itemsMulti.length} observaciones con ≥2 fotos → ${MANIFEST_MULTI_PATH}`);
 }
 
 main().catch((err) => {
