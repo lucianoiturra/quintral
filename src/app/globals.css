@@ -1444,3 +1444,41 @@ label.inline {
   padding: 0 1.25rem 1.15rem;
   margin: 0;
 }
+
+.biblioteca {
+  margin-top: 2.5rem;
+}
+.biblioteca-titulo {
+  margin: 0 0 0.35rem;
+}
+.biblioteca-intro {
+  margin: 0 0 1.25rem;
+  max-width: 60ch;
+}
+.biblioteca-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+}
+.ficha-nombre {
+  margin: 0 0 0.75rem;
+}
+.ficha-label {
+  font-weight: 600;
+  margin: 0.9rem 0 0.25rem;
+}
+.ficha-lista {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+.ficha-presencia summary {
+  cursor: pointer;
+  font-weight: 600;
+  margin-top: 1rem;
+}
+.ficha-estudios {
+  margin: 0.4rem 0 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.5rem;
+}
