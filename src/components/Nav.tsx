@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import ConnectionBadge from "@/components/ConnectionBadge";
 
-const SECTIONS = ["identificar", "mapa", "comparar", "predecir", "preguntas", "aportar"] as const;
+const SECTIONS = ["identificar", "mapa", "comparar", "predecir", "antibacteriano", "preguntas", "aportar"] as const;
 
 export default function Nav() {
   const [open, setOpen] = useState(false);
@@ -80,6 +80,7 @@ export default function Nav() {
           {link("#mapa", "Mapa")}
           {link("#comparar", "Compuestos")}
           {link("#predecir", "Predicción")}
+          {link("#antibacteriano", "Antibacteriano")}
           {link("#preguntas", "Preguntas")}
           {link("#aportar", "Ciencia ciudadana")}
         </div>

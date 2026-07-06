@@ -7,6 +7,7 @@ import IdentifySection from "@/components/IdentifySection";
 import MapSection from "@/components/MapSection";
 import CompararSection from "@/components/CompararSection";
 import PrediccionSection from "@/components/PrediccionSection";
+import AntibacterianoSection from "@/components/AntibacterianoSection";
 import FaqSection from "@/components/FaqSection";
 import ContributeForm, { type Prefill } from "@/components/ContributeForm";
 import PendingPanel from "@/components/PendingPanel";
@@ -28,6 +29,7 @@ export default function HomeClient() {
       <MapSection observations={observations} />
       <CompararSection />
       <PrediccionSection />
+      <AntibacterianoSection />
       <FaqSection />
       <ContributeForm prefill={prefill} onQueue={encolar} />
       <PendingPanel pendientes={pendientes} sincronizar={sincronizar} sincronizando={sincronizando} />
