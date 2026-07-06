@@ -6,6 +6,8 @@ import {
   maxCompuesto,
   NOTA_LITERATURA,
 } from "@/lib/fitoquimica";
+import BibliotecaFito from "@/components/BibliotecaFito";
+import EvidenciaAntimicrobiana from "@/components/EvidenciaAntimicrobiana";
 
 const COLORES_MUESTRA = ["var(--quintral)", "var(--forest-bright)"];
 
@@ -32,10 +34,10 @@ export default function CompararSection() {
         </p>
         <h2>Comparar compuestos entre hospederos</h2>
         <p>
-          Aún no hay mediciones separadas por hospedero. Mostramos el perfil
-          fitoquímico medido del quintral (dos muestras reales de laboratorio) y la
-          evidencia cualitativa de que el hospedero influye en estos compuestos. La
-          comparación numérica entre hospederos es el objetivo de la fase 2026.
+          Dos muestras reales de laboratorio del quintral medidas en 2025 y una
+          biblioteca de los compuestos detectados en la especie. En 2026 sumamos
+          evidencia experimental sobre su actividad antimicrobiana. La comparación
+          cuantitativa entre hospederos sigue siendo un objetivo abierto.
         </p>
       </div>
 
@@ -84,6 +86,9 @@ export default function CompararSection() {
           <p className="alert alert--ok chart-note">{NOTA_LITERATURA}</p>
         </div>
       </div>
+
+      <BibliotecaFito />
+      <EvidenciaAntimicrobiana />
     </section>
   );
 }

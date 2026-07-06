@@ -7,10 +7,20 @@ describe("CompararSection", () => {
     render(<CompararSection />);
     expect(
       screen.getByRole("heading", {
-        name: "Comparar compuestos entre hospederos",
+        name: /perfil fitoquímico del quintral/i,
       }),
     ).toBeInTheDocument();
     expect(screen.getByText(/S-218-25/)).toBeInTheDocument();
     expect(screen.getAllByText("n/d").length).toBeGreaterThan(0);
+  });
+
+  it("incluye la biblioteca fitoquímica y la evidencia antimicrobiana", () => {
+    render(<CompararSection />);
+    expect(
+      screen.getByRole("heading", { name: /biblioteca fitoquímica/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /evidencia sobre actividad antimicrobiana/i }),
+    ).toBeInTheDocument();
   });
 });
