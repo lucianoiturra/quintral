@@ -2,8 +2,11 @@
 import { useEffect, useState } from "react";
 import ConnectionBadge from "@/components/ConnectionBadge";
 
+const SECTIONS = ["identificar", "mapa", "comparar", "predecir", "preguntas", "aportar"] as const;
+
 export default function Nav() {
   const [open, setOpen] = useState(false);
+  const [active, setActive] = useState<string>("");
 
   useEffect(() => {
     if (!open) return;
@@ -13,6 +16,35 @@ export default function Nav() {
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
   }, [open]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setActive(entry.target.id);
+        }
+      },
+      { rootMargin: "-35% 0px -55% 0px", threshold: 0 },
+    );
+    SECTIONS.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  function link(href: string, label: string) {
+    const id = href.replace("#", "");
+    return (
+      <a
+        href={href}
+        className={active === id ? "active" : undefined}
+        onClick={() => setOpen(false)}
+      >
+        {label}
+      </a>
+    );
+  }
 
   return (
     <nav className="nav">
@@ -44,16 +76,15 @@ export default function Nav() {
         </button>
 
         <div id="nav-menu" className={`nav-links${open ? " nav-links--open" : ""}`}>
-          <a href="#identificar" onClick={() => setOpen(false)}>Identificar</a>
-          <a href="#mapa" onClick={() => setOpen(false)}>Mapa</a>
-          <a href="#comparar" onClick={() => setOpen(false)}>Compuestos</a>
-          <a href="#predecir" onClick={() => setOpen(false)}>Predicción</a>
-          <a href="#preguntas" onClick={() => setOpen(false)}>Preguntas</a>
-          <a href="#aportar" onClick={() => setOpen(false)}>Ciencia ciudadana</a>
+          {link("#identificar", "Identificar")}
+          {link("#mapa", "Mapa")}
+          {link("#comparar", "Compuestos")}
+          {link("#predecir", "Predicción")}
+          {link("#preguntas", "Preguntas")}
+          {link("#aportar", "Ciencia ciudadana")}
         </div>
         <ConnectionBadge />
       </div>
-
     </nav>
   );
 }
