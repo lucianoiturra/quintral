@@ -48,6 +48,7 @@ export default function Nav() {
           <a href="#mapa" onClick={() => setOpen(false)}>Mapa</a>
           <a href="#comparar" onClick={() => setOpen(false)}>Compuestos</a>
           <a href="#predecir" onClick={() => setOpen(false)}>Predicción</a>
+          <a href="#preguntas" onClick={() => setOpen(false)}>Preguntas</a>
           <a href="#aportar" onClick={() => setOpen(false)}>Ciencia ciudadana</a>
         </div>
         <ConnectionBadge />

@@ -137,7 +137,7 @@ export default function ContributeForm({
   return (
     <section id="aportar" className="section">
       <div className="section-head">
-        <p className="kicker" data-num="05">Ciencia ciudadana</p>
+        <p className="kicker" data-num="06">Ciencia ciudadana</p>
         <h2>Aporta tus propias observaciones</h2>
         <p>
           Tus registros enriquecen el monitoreo del quintral. Cada observación
