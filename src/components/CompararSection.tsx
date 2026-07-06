@@ -32,7 +32,7 @@ export default function CompararSection() {
         <p className="kicker" data-num="03">
           Análisis fitoquímico
         </p>
-        <h2>Comparar compuestos entre hospederos</h2>
+        <h2>Perfil fitoquímico del quintral (datos 2025)</h2>
         <p>
           Dos muestras reales de laboratorio del quintral medidas en 2025 y una
           biblioteca de los compuestos detectados en la especie. En 2026 sumamos
