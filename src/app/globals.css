@@ -1482,3 +1482,13 @@ label.inline {
   display: grid;
   gap: 0.5rem;
 }
+
+.antimicrobiano {
+  margin-top: 2.5rem;
+}
+.antimicrobiano-cols {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  margin: 1rem 0;
+}
