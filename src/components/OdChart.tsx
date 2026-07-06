@@ -85,12 +85,9 @@ export default function OdChart({
                   rx={3}
                   fill={s.color}
                   className="od-bar"
-                  tabIndex={0}
                   opacity={hover && !activo ? 0.45 : 1}
                   onMouseEnter={() => setHover({ cat: ci, serie: si })}
                   onMouseLeave={() => setHover(null)}
-                  onFocus={() => setHover({ cat: ci, serie: si })}
-                  onBlur={() => setHover(null)}
                 >
                   <title>{`${s.nombre} · ${cat}: ${v} OD`}</title>
                 </rect>

@@ -50,13 +50,29 @@ export default function AntibacterianoSection() {
         </p>
       </div>
 
-      <div className="tabs" role="tablist" aria-label="Bacteria del ensayo">
+      <div
+        className="tabs"
+        role="tablist"
+        aria-label="Bacteria del ensayo"
+        onKeyDown={(e) => {
+          if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+          e.preventDefault();
+          const i = BACTERIAS.findIndex((bac) => bac.id === activa);
+          const delta = e.key === "ArrowRight" ? 1 : -1;
+          const next = BACTERIAS[(i + delta + BACTERIAS.length) % BACTERIAS.length];
+          setActiva(next.id);
+          document.getElementById(`tab-${next.id}`)?.focus();
+        }}
+      >
         {BACTERIAS.map((bac) => (
           <button
             key={bac.id}
+            id={`tab-${bac.id}`}
             type="button"
             role="tab"
             aria-selected={bac.id === activa}
+            aria-controls="antibacteriano-panel"
+            tabIndex={bac.id === activa ? 0 : -1}
             className={`tab${bac.id === activa ? " tab--active" : ""}`}
             onClick={() => setActiva(bac.id)}
           >
@@ -65,7 +81,12 @@ export default function AntibacterianoSection() {
         ))}
       </div>
 
-      <div className="chart-grid">
+      <div
+        className="chart-grid"
+        id="antibacteriano-panel"
+        role="tabpanel"
+        aria-labelledby={`tab-${activa}`}
+      >
         <div className="card card-pad">
           <h3 className="result-title">
             <em>{b.nombre}</em> {b.cepa} · Gram {b.gram}
@@ -122,7 +143,7 @@ export default function AntibacterianoSection() {
         propio 2026.
       </p>
 
-      <div className="card card-pad card--muted antibacteriano-marinas">
+      <div className="card card-pad card--muted">
         <h3 className="result-title">Bacterias marinas — ensayo en curso</h3>
         <p className="result-empty">
           Estamos evaluando el extracto de quintral contra bacterias marinas.
