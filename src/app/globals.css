@@ -1302,6 +1302,32 @@ label.inline {
   fill: var(--ink);
 }
 
+.od-chart {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.od-bar {
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.od-bar:focus-visible {
+  outline: 2px solid var(--forest-bright);
+  outline-offset: 2px;
+}
+
+.od-tip {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 700;
+  fill: var(--ink);
+  paint-order: stroke;
+  stroke: var(--surface, #fff);
+  stroke-width: 3px;
+}
+
 .predecir-form {
   display: grid;
   gap: 1rem;
