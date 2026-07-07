@@ -3,19 +3,23 @@ import { render, screen } from "@testing-library/react";
 import EvidenciaAntimicrobiana from "@/components/EvidenciaAntimicrobiana";
 
 describe("EvidenciaAntimicrobiana", () => {
-  it("muestra las 3 bacterias y el resultado sin inhibición", () => {
+  it("muestra el veredicto sin inhibición y las 3 bacterias", () => {
     render(<EvidenciaAntimicrobiana />);
-    expect(screen.getByText(/Escherichia coli ATCC 25922/)).toBeInTheDocument();
-    expect(screen.getByText(/Staphylococcus aureus ATCC 25923/)).toBeInTheDocument();
-    expect(screen.getByText(/Enterococcus faecalis ATCC 29212/)).toBeInTheDocument();
-    expect(screen.getAllByText(/sin inhibición/i).length).toBe(3);
+    expect(screen.getByText(/sin inhibición del crecimiento/i)).toBeInTheDocument();
+    // Scope bacteria queries to the verdict list to avoid ambiguity with NOTA_LITERATURA
+    const veredicto = screen.getByRole("heading", { name: /sin inhibición del crecimiento/i }).closest(".ensayo-veredicto");
+    expect(veredicto).toBeInTheDocument();
+    expect(veredicto?.textContent).toMatch(/Escherichia coli/);
+    expect(veredicto?.textContent).toMatch(/Staphylococcus aureus/);
+    expect(veredicto?.textContent).toMatch(/Enterococcus faecalis/);
   });
 
-  it("presenta las líneas futuras y el aprendizaje", () => {
+  it("presenta la narrativa, el aprendizaje y pliega el detalle técnico", () => {
     render(<EvidenciaAntimicrobiana />);
-    expect(
-      screen.getByRole("heading", { name: /qué aprendimos/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /la pregunta/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /qué significa/i })).toBeInTheDocument();
     expect(screen.getByText(/no mostraron actividad antimicrobiana/i)).toBeInTheDocument();
+    // el detalle técnico (concentraciones/controles) está dentro de un <details>
+    expect(screen.getByText(/ver detalles del ensayo/i)).toBeInTheDocument();
   });
 });

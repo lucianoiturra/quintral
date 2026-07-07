@@ -15,61 +15,81 @@ export default function EvidenciaAntimicrobiana() {
   return (
     <div className="antimicrobiano">
       <h3 className="biblioteca-titulo">Evidencia sobre actividad antimicrobiana</h3>
-      <p className="biblioteca-intro">{NOTA_LITERATURA}</p>
 
-      <div className="card card-pad">
-        <h4>Resultados de Quintral Insight (proyecto 2026)</h4>
-        <p>
-          Se evaluaron extractos etanólicos de quintral hospedado en{" "}
-          {HOSPEDEROS_ENSAYADOS.join(" y ")} frente a tres bacterias de referencia.
-        </p>
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th scope="col">Bacteria</th>
-              <th scope="col">Resultado</th>
-            </tr>
-          </thead>
-          <tbody>
+      <div className="ensayo-pasos">
+        <article className="ensayo-paso">
+          <span className="ensayo-num">1</span>
+          <h4>La pregunta</h4>
+          <p>¿Los extractos de quintral inhiben el crecimiento de bacterias?</p>
+        </article>
+
+        <article className="ensayo-paso">
+          <span className="ensayo-num">2</span>
+          <h4>Qué probamos</h4>
+          <p>
+            Extractos etanólicos de quintral hospedado en{" "}
+            {HOSPEDEROS_ENSAYADOS.join(" y ")} frente a tres bacterias de referencia,
+            a {CONCENTRACIONES.join("–")} µg/mL. Control positivo: {CONTROL_POSITIVO}.
+          </p>
+        </article>
+
+        <article className="ensayo-veredicto">
+          <span className="ensayo-num">3</span>
+          <p className="ensayo-label">Resultado del ensayo 2026</p>
+          <h4>Sin inhibición del crecimiento</h4>
+          <ul className="ensayo-bacterias">
             {RESULTADOS.map((r) => (
-              <tr key={r.bacteria}>
-                <th scope="row">{r.bacteria}</th>
-                <td>❌ Sin inhibición del crecimiento</td>
-              </tr>
+              <li key={r.bacteria}>
+                <span aria-hidden="true">✕</span> {r.bacteria}
+              </li>
             ))}
-          </tbody>
-        </table>
+          </ul>
+        </article>
+
+        <article className="ensayo-paso">
+          <span className="ensayo-num">4</span>
+          <h4>Qué significa</h4>
+          <p>
+            La ausencia de efecto también es evidencia: orienta hacia otros
+            hospederos, solventes y concentraciones.
+          </p>
+        </article>
+      </div>
+
+      <details className="ensayo-detalle">
+        <summary>Ver detalles del ensayo</summary>
+
+        <p className="data-source">
+          {NOTA_LITERATURA}
+        </p>
         <p className="data-source">
           Concentraciones ensayadas: {CONCENTRACIONES.join(", ")} µg/mL. Control
-          positivo: {CONTROL_POSITIVO}; control negativo: {CONTROL_NEGATIVO}. Los
-          antibiogramas a 1024 µg/mL no mostraron halos de inhibición para ninguna
-          bacteria, mientras que el control con {CONTROL_POSITIVO} sí presentó
-          actividad.
+          positivo: {CONTROL_POSITIVO} (sí mostró actividad); control negativo:{" "}
+          {CONTROL_NEGATIVO}. Los antibiogramas a 1024 µg/mL no mostraron halos de
+          inhibición para ninguna bacteria.
         </p>
-      </div>
 
-      <div className="antimicrobiano-cols">
-        <div className="card card-pad">
-          <h4>Factores que pueden influir</h4>
-          <p>La ausencia de actividad no significa que el quintral no tenga compuestos bioactivos. Pueden influir:</p>
-          <ul className="ficha-lista">
-            {FACTORES.map((f) => (
-              <li key={f}>{f}</li>
-            ))}
-          </ul>
+        <div className="antimicrobiano-cols">
+          <div>
+            <h5>Factores que pueden influir</h5>
+            <ul className="ficha-lista">
+              {FACTORES.map((f) => (
+                <li key={f}>{f}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h5>Investigaciones que continúan</h5>
+            <ul className="ficha-lista">
+              {LINEAS_FUTURAS.map((l) => (
+                <li key={l}>{l}</li>
+              ))}
+            </ul>
+          </div>
         </div>
+      </details>
 
-        <div className="card card-pad">
-          <h4>Investigaciones que continúan</h4>
-          <ul className="ficha-lista">
-            {LINEAS_FUTURAS.map((l) => (
-              <li key={l}>🔬 {l}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      <div className="card card-pad">
+      <div className="card card-pad ensayo-aprendizaje">
         <h4>¿Qué aprendimos?</h4>
         <p className="alert alert--ok">{APRENDIZAJE}</p>
       </div>
