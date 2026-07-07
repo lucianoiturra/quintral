@@ -5,11 +5,18 @@ import { colorHospedero, etiquetaHospedero } from "@/lib/hosts";
 import { isSafePhotoUrl } from "@/lib/photoUrl";
 import type { Observation } from "@/lib/types";
 
-const CENTRO_DEFAULT: [number, number] = [-33.2123, -70.342];
+const CENTRO_DEFAULT: [number, number] = [-33.3560, -70.5720];
 
 export default function MapaQuintral({ observations }: { observations: Observation[] }) {
+  const centro: [number, number] = observations.length
+    ? [
+        observations.reduce((s, o) => s + o.lat, 0) / observations.length,
+        observations.reduce((s, o) => s + o.lng, 0) / observations.length,
+      ]
+    : CENTRO_DEFAULT;
+
   return (
-    <MapContainer center={CENTRO_DEFAULT} zoom={14} style={{ height: "100%", width: "100%" }}>
+    <MapContainer center={centro} zoom={14} style={{ height: "100%", width: "100%" }}>
       <TileLayer
         url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution="&copy; OpenStreetMap"

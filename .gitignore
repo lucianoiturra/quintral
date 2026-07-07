@@ -10,6 +10,7 @@ next-env.d.ts
 .cursor/
 .gemini/
 .claude/
+.codex/
 .impeccable/
 
 # Serwist generated service worker (build artifact)

@@ -91,17 +91,17 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
     <section id="identificar" className="section">
       <div className="section-head">
         <p className="kicker" data-num="01">
-          Vision por computador
+          Visión por computador
         </p>
-        <h2>Identificacion automatica con IA</h2>
-        <p>Sube una fotografia del ejemplar. El modelo estima especie, hospedero probable y fenologia.</p>
+        <h2>Identificación automática con IA</h2>
+        <p>Sube una fotografía del ejemplar. El modelo estima especie, hospedero probable y fenología.</p>
       </div>
 
       <div className="identify-grid">
         <div className="card card-pad">
           <RanurasFotos archivos={archivos} onCambio={cambiarFoto} error={setError} />
 
-          <label className="identify-zona">
+          <label className="field identify-zona">
             <span>¿Dónde se tomó la foto? (opcional — mejora la precisión)</span>
             <select value={zonaId} onChange={(e) => setZonaId(e.target.value as ZonaId | "")}>
               <option value="">No especificar</option>
@@ -131,75 +131,85 @@ export default function IdentifySection({ onPrefill }: { onPrefill: (p: Prefill)
                 onClick={analizar}
                 disabled={fotos.length === 0 || cargando}
               >
-                {cargando ? "Analizando..." : "Analizar"}
+                {cargando ? "Analizando…" : "Analizar"}
               </button>
             </div>
           </div>
         </div>
 
         <div className="card card-pad result">
-          <h3 className="result-title">Resultado del analisis</h3>
+          <h3 className="result-title">Resultado del análisis</h3>
           {error ? <p className="alert alert--error">{error}</p> : null}
 
-          {!resultado && !error ? (
-            <p className="result-empty">
-              Sube una imagen para evaluar el ejemplar y obtener los hospederos mas probables, la
-              confianza del modelo y notas de campo.
-            </p>
-          ) : null}
-
-          {resultado ? (
-            <>
-              <div className="result-verdict">
-                <span className={`badge ${resultado.esQuintral ? "badge--yes" : "badge--maybe"}`}>
-                  {resultado.esQuintral ? "Es quintral" : "Sin certeza"}
-                </span>
+          <div aria-live="polite" aria-atomic="true">
+            {cargando ? (
+              <div className="result-skeleton" aria-label="Analizando imagen con IA…">
+                <div className="skeleton-line skeleton-line--title" />
+                <div className="skeleton-line" />
+                <div className="skeleton-line skeleton-line--short" />
+                <div className="skeleton-line" />
+                <div className="skeleton-line skeleton-line--short" />
               </div>
-
-              <div className="result-options">
-                <p className="result-options-label">Hospederos mas probables</p>
-                {resultado.opciones.map((opcion, index) => {
-                  const pct = Math.round(opcion.confianza * 100);
-                  return (
-                    <div key={opcion.hospedero + index} className="result-option">
-                      <div className="result-conf-head">
-                        <span>
-                          <strong>{index + 1}o</strong> {etiquetaHospedero(opcion.hospedero)}
-                        </span>
-                        <strong>{pct}%</strong>
-                      </div>
-                      <div
-                        className="meter"
-                        role="meter"
-                        aria-valuenow={pct}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                      >
-                        <span style={{ transform: `scaleX(${opcion.confianza})` }} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <dl className="result-data">
-                <div>
-                  <dt>Fenologia</dt>
-                  <dd>{resultado.fenologia || "-"}</dd>
+            ) : !resultado && !error ? (
+              <p className="result-empty">
+                Sube una imagen para evaluar el ejemplar y obtener los hospederos más probables, la
+                confianza del modelo y notas de campo.
+              </p>
+            ) : resultado ? (
+              <>
+                <div className="result-verdict">
+                  <span className={`badge ${resultado.esQuintral ? "badge--yes" : "badge--maybe"}`}>
+                    {resultado.esQuintral ? "Es quintral" : "Sin certeza"}
+                  </span>
                 </div>
-                <div>
-                  <dt>Notas</dt>
-                  <dd>{resultado.notas || "-"}</dd>
-                </div>
-              </dl>
 
-              {resultado.opciones[0].confianza < 0.4 ? (
-                <p className="alert alert--error">
-                  Baja confianza: confirma el hospedero a mano en el formulario.
-                </p>
-              ) : null}
-            </>
-          ) : null}
+                <div className="result-options">
+                  <p className="result-options-label">Hospederos más probables</p>
+                  {resultado.opciones.map((opcion, index) => {
+                    const pct = Math.round(opcion.confianza * 100);
+                    const ordinal = index === 0 ? "1.°" : index === 1 ? "2.°" : `${index + 1}.°`;
+                    return (
+                      <div key={opcion.hospedero + index} className="result-option">
+                        <div className="result-conf-head">
+                          <span>
+                            <strong>{ordinal}</strong> {etiquetaHospedero(opcion.hospedero)}
+                          </span>
+                          <strong>{pct}%</strong>
+                        </div>
+                        <div
+                          className="meter"
+                          role="meter"
+                          aria-valuenow={pct}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-label={`Confianza en ${etiquetaHospedero(opcion.hospedero)}: ${pct}%`}
+                        >
+                          <span style={{ transform: `scaleX(${opcion.confianza})` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <dl className="result-data">
+                  <div>
+                    <dt>Fenología</dt>
+                    <dd>{resultado.fenologia || "-"}</dd>
+                  </div>
+                  <div>
+                    <dt>Notas</dt>
+                    <dd>{resultado.notas || "-"}</dd>
+                  </div>
+                </dl>
+
+                {resultado.opciones[0].confianza < 0.4 ? (
+                  <p className="alert alert--error">
+                    Baja confianza: confirma el hospedero a mano en el formulario.
+                  </p>
+                ) : null}
+              </>
+            ) : null}
+          </div>
 
           {resultado || fotos.length > 0 ? (
             <button type="button" className="btn btn--forest result-cta" onClick={agregarAlMapa}>

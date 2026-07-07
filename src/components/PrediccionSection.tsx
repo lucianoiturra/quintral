@@ -7,7 +7,6 @@ import type { Host } from "@/lib/types";
 
 export default function PrediccionSection() {
   const [hospedero, setHospedero] = useState<Host>("aromo");
-  const [fenologia, setFenologia] = useState("");
   const [enviado, setEnviado] = useState<{ hospedero: Host } | null>(null);
 
   const barras: Barra[] = COMPUESTOS.map((c) => ({
@@ -26,8 +25,8 @@ export default function PrediccionSection() {
           </p>
           <h2>Predicción fitoquímica del ejemplar</h2>
           <p>
-            Indica el hospedero y la fenología del ejemplar para ver su perfil
-            fitoquímico de referencia.
+            Indica el hospedero del ejemplar para ver su perfil fitoquímico de
+            referencia.
           </p>
         </div>
 
@@ -51,16 +50,6 @@ export default function PrediccionSection() {
                   </option>
                 ))}
               </select>
-            </label>
-
-            <label className="field">
-              <span>Fenología</span>
-              <input
-                type="text"
-                value={fenologia}
-                onChange={(e) => setFenologia(e.target.value)}
-                placeholder="en flor, con frutos, vegetativo…"
-              />
             </label>
 
             <button type="submit" className="btn btn--primary">

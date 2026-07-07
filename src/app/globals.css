@@ -17,7 +17,7 @@
   --surface: oklch(0.995 0.004 95);
   --ink: oklch(0.26 0.022 150);
   --ink-soft: oklch(0.43 0.022 150);
-  --ink-faint: oklch(0.56 0.018 150);
+  --ink-faint: oklch(0.46 0.022 150);
   --line: oklch(0.88 0.014 110);
   --line-soft: oklch(0.92 0.012 110);
 
@@ -476,11 +476,13 @@ label.inline {
   transition: transform 0.22s var(--ease-out);
 }
 
-.nav-links a:hover {
+.nav-links a:hover,
+.nav-links a.active {
   color: var(--ink);
 }
 
-.nav-links a:hover::after {
+.nav-links a:hover::after,
+.nav-links a.active::after {
   transform: scaleX(1);
 }
 
@@ -593,7 +595,11 @@ label.inline {
   position: absolute;
   inset: 0;
   z-index: -2;
-  background: url("/quintral.jpg") center 30% / cover no-repeat;
+  background-color: var(--forest-deep);
+  background-image: url("/quintral.jpg");
+  background-position: center 30%;
+  background-size: cover;
+  background-repeat: no-repeat;
   transform: scale(1.04);
 }
 
@@ -962,18 +968,49 @@ label.inline {
   align-self: flex-start;
 }
 
-/* Zona / select de identificación */
+/* Skeleton loader (análisis IA en curso) */
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.result-skeleton {
+  display: grid;
+  gap: 0.9rem;
+  padding: 0.25rem 0;
+}
+
+.skeleton-line {
+  height: 13px;
+  border-radius: var(--r-pill);
+  background: linear-gradient(
+    90deg,
+    var(--line-soft) 25%,
+    var(--line) 50%,
+    var(--line-soft) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.skeleton-line--title {
+  height: 20px;
+  width: 58%;
+}
+
+.skeleton-line--short {
+  width: 42%;
+}
+
+/* Zona / select de identificación (modificador sobre .field) */
 
 .identify-zona {
-  display: grid;
-  gap: 0.35rem;
   margin-top: 0.85rem;
 }
 
 .identify-zona > span {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--ink-soft);
+  text-transform: none;
   letter-spacing: 0.02em;
 }
 

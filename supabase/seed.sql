@@ -1,7 +1,7 @@
 insert into observaciones (nombre_observador, lat, lng, hospedero, fenologia, cerro) values
-  ('Equipo Quintral Insight', -33.2129, -70.3416, 'litre', 'vegetativo', 'Manquehue'),
-  ('Equipo Quintral Insight', -33.2125, -70.3418, 'litre', 'vegetativo', 'Manquehue'),
-  ('Equipo Quintral Insight', -33.2124, -70.3416, 'quillay', 'vegetativo', 'Manquehue'),
-  ('Equipo Quintral Insight', -33.2121, -70.3419, 'quillay', 'vegetativo', 'Manquehue'),
-  ('Equipo Quintral Insight', -33.2117, -70.3426, 'quillay', 'vegetativo', 'Manquehue'),
-  ('Equipo Quintral Insight', -33.2114, -70.3428, 'quillay', 'vegetativo', 'Manquehue');
+  ('Equipo Quintral Insight', -33.3581, -70.5711, 'litre', 'vegetativo', 'Manquehue'),
+  ('Equipo Quintral Insight', -33.3569, -70.5717, 'litre', 'vegetativo', 'Manquehue'),
+  ('Equipo Quintral Insight', -33.3567, -70.5711, 'quillay', 'vegetativo', 'Manquehue'),
+  ('Equipo Quintral Insight', -33.3558, -70.5719, 'quillay', 'vegetativo', 'Manquehue'),
+  ('Equipo Quintral Insight', -33.3547, -70.5739, 'quillay', 'vegetativo', 'Manquehue'),
+  ('Equipo Quintral Insight', -33.3539, -70.5744, 'quillay', 'vegetativo', 'Manquehue');

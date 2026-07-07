@@ -37,8 +37,8 @@ export default function MapSection({ observations }: { observations: Observation
         </div>
 
         <div className="map-filters">
-          <div className="filter-group">
-            <span className="filter-label">Cerro</span>
+          <div className="filter-group" role="group" aria-labelledby="filter-cerro-label">
+            <span id="filter-cerro-label" className="filter-label">Cerro</span>
             <div className="pill-row">
               <button
                 type="button"
@@ -62,8 +62,8 @@ export default function MapSection({ observations }: { observations: Observation
             </div>
           </div>
 
-          <div className="filter-group">
-            <span className="filter-label">Hospedero</span>
+          <div className="filter-group" role="group" aria-labelledby="filter-hospedero-label">
+            <span id="filter-hospedero-label" className="filter-label">Hospedero</span>
             <div className="pill-row">
               <button
                 type="button"
