@@ -36,8 +36,8 @@ export default function MatrizFito() {
       </div>
       <p className="fito-matriz-nota">
         Casi todos los compuestos del quintral son{" "}
-        <strong>antioxidantes, antiinflamatorios y antimicrobianos</strong>: por eso
-        interesa estudiar su potencial biomédico.
+        <strong>antiinflamatorios y antimicrobianos</strong>: por eso interesa
+        estudiar su potencial biomédico.
       </p>
     </div>
   );
