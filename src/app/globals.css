@@ -1574,6 +1574,19 @@ label.inline {
   margin: 0;
 }
 
+/* Utilidad de accesibilidad */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .biblioteca {
   margin-top: 2.5rem;
 }
@@ -1583,14 +1596,104 @@ label.inline {
 .biblioteca-intro {
   margin: 0 0 1.25rem;
   max-width: 60ch;
+  color: var(--ink-soft);
 }
+
+/* Matriz-panorama */
+.fito-matriz {
+  margin: 0 0 1.5rem;
+}
+.fito-matriz-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+.fito-matriz-tabla {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 40rem;
+  font-size: 0.85rem;
+}
+.fito-matriz-tabla th,
+.fito-matriz-tabla td {
+  padding: 0.5rem 0.6rem;
+  text-align: center;
+  border-bottom: 1px solid var(--line);
+}
+.fito-matriz-tabla thead th {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--ink-soft);
+  vertical-align: bottom;
+}
+.fito-matriz-tabla tbody th {
+  text-align: left;
+  white-space: nowrap;
+  position: sticky;
+  left: 0;
+  background: var(--surface);
+  font-weight: 600;
+}
+.fito-cell.yes {
+  color: var(--forest-bright);
+  font-weight: 800;
+}
+.fito-cell.no {
+  color: var(--line);
+}
+.fito-matriz-nota {
+  margin: 0.7rem 0 0;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
 .biblioteca-grid {
   display: grid;
   gap: 1rem;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
 }
+.ficha-familia {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--forest-bright);
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.ficha-familia::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--forest-bright);
+}
 .ficha-nombre {
-  margin: 0 0 0.75rem;
+  margin: 0.35rem 0 0.15rem;
+}
+.ficha-resumen {
+  margin: 0 0 0.85rem;
+  color: var(--ink-soft);
+}
+.ficha-chips {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.ficha-chip {
+  border: 1px solid var(--forest-bright);
+  color: var(--forest);
+  background: color-mix(in oklch, var(--forest-bright) 10%, var(--surface));
+  border-radius: var(--r-sm);
+  padding: 0.2rem 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 600;
 }
 .ficha-label {
   font-weight: 600;
@@ -1600,10 +1703,13 @@ label.inline {
   margin: 0;
   padding-left: 1.1rem;
 }
-.ficha-presencia summary {
+.ficha-detalle summary {
   cursor: pointer;
   font-weight: 600;
-  margin-top: 1rem;
+  color: var(--forest-bright);
+  margin-top: 0.6rem;
+  border-top: 1px dashed var(--line);
+  padding-top: 0.7rem;
 }
 .ficha-estudios {
   margin: 0.4rem 0 0;
@@ -1612,12 +1718,103 @@ label.inline {
   gap: 0.5rem;
 }
 
+/* Evidencia: narrativa + veredicto */
 .antimicrobiano {
   margin-top: 2.5rem;
+}
+.ensayo-pasos {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  align-items: stretch;
+  margin: 1rem 0;
+}
+.ensayo-paso,
+.ensayo-veredicto {
+  flex: 1 1 12rem;
+  border-radius: var(--r-md);
+  padding: 0.9rem 1rem;
+}
+.ensayo-paso {
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.ensayo-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: var(--r-pill);
+  background: color-mix(in oklch, var(--forest-bright) 14%, var(--surface));
+  color: var(--forest);
+  font-weight: 800;
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+.ensayo-paso h4,
+.ensayo-veredicto h4 {
+  margin: 0.1rem 0 0.3rem;
+}
+.ensayo-paso p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+.ensayo-veredicto {
+  flex: 1 1 14rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--line);
+}
+.ensayo-veredicto .ensayo-num {
+  background: var(--surface);
+  color: var(--ink);
+}
+.ensayo-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  font-weight: 700;
+  margin: 0;
+}
+.ensayo-bacterias {
+  list-style: none;
+  padding: 0;
+  margin: 0.4rem 0 0;
+  display: grid;
+  gap: 0.3rem;
+}
+.ensayo-bacterias li {
+  font-style: italic;
+  font-size: 0.86rem;
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+}
+.ensayo-bacterias span {
+  font-style: normal;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+.ensayo-detalle {
+  margin: 0.4rem 0 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 0.7rem 1rem;
+  background: var(--surface);
+}
+.ensayo-detalle summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--forest-bright);
 }
 .antimicrobiano-cols {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
-  margin: 1rem 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  margin: 1rem 0 0;
+}
+.ensayo-aprendizaje {
+  margin-top: 0.5rem;
 }
