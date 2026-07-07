@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { BIBLIOTECA } from "@/lib/bibliotecaFito";
+import { BIBLIOTECA, PROPIEDADES_CANONICAS } from "@/lib/bibliotecaFito";
 
 describe("BIBLIOTECA fitoquímica", () => {
   it("tiene las 6 fichas esperadas", () => {
@@ -33,5 +33,36 @@ describe("BIBLIOTECA fitoquímica", () => {
     const citas = poli.estudios.map((e) => e.cita);
     expect(citas.some((c) => c.includes("Torres"))).toBe(true);
     expect(citas.some((c) => c.includes("Simirgiotis"))).toBe(true);
+  });
+});
+
+describe("modelo canónico de la Biblioteca", () => {
+  it("cada ficha tiene familia, resumen y propiedades canónicas válidas", () => {
+    for (const f of BIBLIOTECA) {
+      expect(f.familia.length).toBeGreaterThan(0);
+      expect(f.resumen.length).toBeGreaterThan(0);
+      expect(f.propiedades.length).toBeGreaterThan(0);
+      for (const p of f.propiedades) {
+        expect(PROPIEDADES_CANONICAS).toContain(p);
+      }
+    }
+  });
+
+  it("expone 7 propiedades canónicas en orden de columnas", () => {
+    expect(PROPIEDADES_CANONICAS).toEqual([
+      "Antioxidante",
+      "Antiinflamatoria",
+      "Antimicrobiana",
+      "Antifúngica",
+      "Antivírica",
+      "Anticancerígena",
+      "Cardio",
+    ]);
+  });
+
+  it("los polifenoles marcan antioxidante y antimicrobiana", () => {
+    const poli = BIBLIOTECA.find((f) => f.id === "polifenoles")!;
+    expect(poli.propiedades).toContain("Antioxidante");
+    expect(poli.propiedades).toContain("Antimicrobiana");
   });
 });

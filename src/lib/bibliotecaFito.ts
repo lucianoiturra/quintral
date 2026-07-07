@@ -4,9 +4,31 @@ export interface EstudioFito {
   url: string;
 }
 
+export type PropiedadCanonica =
+  | "Antioxidante"
+  | "Antiinflamatoria"
+  | "Antimicrobiana"
+  | "Antifúngica"
+  | "Antivírica"
+  | "Anticancerígena"
+  | "Cardio";
+
+export const PROPIEDADES_CANONICAS: PropiedadCanonica[] = [
+  "Antioxidante",
+  "Antiinflamatoria",
+  "Antimicrobiana",
+  "Antifúngica",
+  "Antivírica",
+  "Anticancerígena",
+  "Cardio",
+];
+
 export interface FichaCompuesto {
   id: string;
   nombre: string;
+  familia: string;
+  resumen: string;
+  propiedades: PropiedadCanonica[];
   queEs: string;
   funcionEnPlanta: string[];
   aplicacionesBiomedicas: string[];
@@ -23,6 +45,9 @@ export const BIBLIOTECA: FichaCompuesto[] = [
   {
     id: "polifenoles",
     nombre: "Polifenoles",
+    familia: "Compuesto fenólico",
+    resumen: "Defensa antioxidante de la planta",
+    propiedades: ["Antioxidante", "Antiinflamatoria", "Antimicrobiana", "Anticancerígena", "Cardio"],
     queEs:
       "Los polifenoles son un amplio grupo de compuestos naturales producidos por las plantas. Se caracterizan por tener uno o más grupos fenólicos y participar en la defensa frente a factores ambientales.",
     funcionEnPlanta: [
@@ -58,6 +83,9 @@ export const BIBLIOTECA: FichaCompuesto[] = [
   {
     id: "flavonoides",
     nombre: "Flavonoides",
+    familia: "Polifenol (subgrupo)",
+    resumen: "Pigmentos que protegen y defienden",
+    propiedades: ["Antioxidante", "Antiinflamatoria", "Antimicrobiana", "Antivírica", "Cardio"],
     queEs:
       "Los flavonoides son un subgrupo de los polifenoles responsables de muchos de los colores presentes en flores, hojas y frutos.",
     funcionEnPlanta: [
@@ -92,6 +120,9 @@ export const BIBLIOTECA: FichaCompuesto[] = [
   {
     id: "terpenoides",
     nombre: "Terpenoides",
+    familia: "Metabolito secundario",
+    resumen: "Aromas y resinas defensivas",
+    propiedades: ["Antiinflamatoria", "Antimicrobiana", "Antifúngica", "Anticancerígena"],
     queEs:
       "Los terpenoides constituyen uno de los grupos más diversos de metabolitos secundarios de las plantas.",
     funcionEnPlanta: [
@@ -120,6 +151,9 @@ export const BIBLIOTECA: FichaCompuesto[] = [
   {
     id: "quinonas",
     nombre: "Quinonas",
+    familia: "Compuesto aromático",
+    resumen: "Defensa química frente a microbios",
+    propiedades: ["Antimicrobiana", "Antifúngica", "Antivírica", "Anticancerígena"],
     queEs:
       "Las quinonas son compuestos aromáticos presentes en numerosas especies vegetales.",
     funcionEnPlanta: [
@@ -145,6 +179,9 @@ export const BIBLIOTECA: FichaCompuesto[] = [
   {
     id: "esteroles",
     nombre: "Esteroles",
+    familia: "Fitosterol / lípido",
+    resumen: "Lípidos estructurales de la membrana",
+    propiedades: ["Antiinflamatoria", "Cardio"],
     queEs:
       "Los esteroles vegetales (fitosteroles) son lípidos estructurales presentes en las membranas celulares de las plantas.",
     funcionEnPlanta: [
@@ -171,6 +208,9 @@ export const BIBLIOTECA: FichaCompuesto[] = [
   {
     id: "glicosidos",
     nombre: "Glicósidos",
+    familia: "Glicósido",
+    resumen: "Azúcares que almacenan compuestos activos",
+    propiedades: ["Antioxidante", "Antiinflamatoria", "Antimicrobiana", "Anticancerígena", "Cardio"],
     queEs:
       "Los glicósidos son moléculas formadas por un azúcar unido a otro compuesto químico (aglicona). Existen distintos tipos, como los glicósidos cardíacos, fenólicos y flavonoides.",
     funcionEnPlanta: [
