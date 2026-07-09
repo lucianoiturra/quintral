@@ -6,6 +6,12 @@ import { getSupabaseAdmin } from "@/lib/server/supabaseAdmin";
 export const runtime = "nodejs";
 
 const MAX_IDS = 5000;
+/**
+ * Cuántos ids se borran por petición a PostgREST. El filtro .in() viaja en la
+ * URL, así que cientos de UUID la hacen tan larga que el servidor la rechaza.
+ * Borramos en lotes para no pasarnos del límite de longitud.
+ */
+const BATCH_SIZE = 100;
 
 export async function POST(request: Request): Promise<Response> {
   const cookieStore = await cookies();
@@ -33,10 +39,12 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const admin = getSupabaseAdmin();
-  const { error } = await admin.from("observaciones").delete().in("id", ids);
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  for (let i = 0; i < ids.length; i += BATCH_SIZE) {
+    const lote = ids.slice(i, i + BATCH_SIZE);
+    const { error } = await admin.from("observaciones").delete().in("id", lote);
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
   }
 
   await admin.from("admin_log").insert({

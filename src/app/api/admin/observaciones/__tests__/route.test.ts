@@ -18,6 +18,7 @@ const updateChain = {
 };
 const deleteChain = {
   eq: vi.fn(),
+  in: vi.fn(),
 };
 
 const fromMock = vi.fn();
@@ -40,6 +41,7 @@ import {
   DELETE as deleteObservacion,
   PATCH as patchObservacion,
 } from "@/app/api/admin/observaciones/[id]/route";
+import { POST as bulkDelete } from "@/app/api/admin/observaciones/bulk-delete/route";
 import { GET as getLog } from "@/app/api/admin/log/route";
 
 function adminCookie(value = "valid") {
@@ -87,6 +89,7 @@ describe("admin observaciones routes", () => {
     updateChain.single.mockResolvedValue({ data: observationRow({ oculta: true }), error: null });
 
     deleteChain.eq.mockResolvedValue({ error: null });
+    deleteChain.in.mockResolvedValue({ error: null });
 
     fromMock.mockImplementation((table: string) => {
       if (table === "observaciones") {
@@ -159,6 +162,33 @@ describe("admin observaciones routes", () => {
     });
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ ok: true });
+  });
+
+  it("POST bulk-delete borra en lotes cuando hay muchos ids", async () => {
+    const ids = Array.from({ length: 250 }, (_, i) => `obs-${i}`);
+    const request = new Request("http://localhost/api/admin/observaciones/bulk-delete", {
+      method: "POST",
+      body: JSON.stringify({ ids }),
+      headers: { "content-type": "application/json" },
+    });
+
+    const response = await bulkDelete(request);
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ ok: true, borradas: 250 });
+    // 250 ids en lotes de 100 => 3 llamadas .in()
+    expect(deleteChain.in).toHaveBeenCalledTimes(3);
+    expect(deleteChain.in.mock.calls[0][1]).toHaveLength(100);
+    expect(deleteChain.in.mock.calls[2][1]).toHaveLength(50);
+  });
+
+  it("POST bulk-delete devuelve 400 si no hay ids", async () => {
+    const request = new Request("http://localhost/api/admin/observaciones/bulk-delete", {
+      method: "POST",
+      body: JSON.stringify({ ids: [] }),
+      headers: { "content-type": "application/json" },
+    });
+    const response = await bulkDelete(request);
+    expect(response.status).toBe(400);
   });
 
   it("GET /api/admin/log devuelve 401 antes de tocar la base de datos si no hay sesion", async () => {
