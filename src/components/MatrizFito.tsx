@@ -1,7 +1,11 @@
 "use client";
-import { BIBLIOTECA, PROPIEDADES_CANONICAS } from "@/lib/bibliotecaFito";
+import { BIBLIOTECA, PROPIEDADES_CANONICAS, type FichaCompuesto } from "@/lib/bibliotecaFito";
 
-export default function MatrizFito() {
+export default function MatrizFito({
+  onSelectCompuesto,
+}: {
+  onSelectCompuesto?: (ficha: FichaCompuesto) => void;
+}) {
   return (
     <div className="fito-matriz">
       <div className="fito-matriz-scroll">
@@ -19,7 +23,20 @@ export default function MatrizFito() {
           <tbody>
             {BIBLIOTECA.map((ficha) => (
               <tr key={ficha.id}>
-                <th scope="row">{ficha.nombre}</th>
+                <th scope="row">
+                  {onSelectCompuesto ? (
+                    <button
+                      type="button"
+                      className="fito-compuesto-btn"
+                      onClick={() => onSelectCompuesto(ficha)}
+                      aria-haspopup="dialog"
+                    >
+                      {ficha.nombre}
+                    </button>
+                  ) : (
+                    ficha.nombre
+                  )}
+                </th>
                 {PROPIEDADES_CANONICAS.map((p) => {
                   const tiene = ficha.propiedades.includes(p);
                   return (
@@ -35,7 +52,8 @@ export default function MatrizFito() {
         </table>
       </div>
       <p className="fito-matriz-nota">
-        Casi todos los compuestos del quintral son{" "}
+        Pincha el nombre de un compuesto para ver su ficha completa. Casi todos los
+        compuestos del quintral son{" "}
         <strong>antiinflamatorios y antimicrobianos</strong>: por eso interesa
         estudiar su potencial biomédico.
       </p>

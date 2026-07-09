@@ -3,21 +3,23 @@ import { render, screen, fireEvent, within } from "@testing-library/react";
 import BibliotecaFito from "@/components/BibliotecaFito";
 
 describe("BibliotecaFito", () => {
-  it("muestra la matriz-panorama y los 6 compuestos con su resumen", () => {
+  it("muestra la matriz-panorama con los compuestos y sin fichas debajo", () => {
     render(<BibliotecaFito />);
     expect(screen.getByRole("table")).toBeInTheDocument();
-    expect(screen.getAllByText("Polifenoles").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Glicósidos").length).toBeGreaterThan(0);
-    expect(screen.getByText(/defensa antioxidante de la planta/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Polifenoles" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Glicósidos" })).toBeInTheDocument();
+    // El resumen del compuesto ya no se muestra suelto: vive dentro del modal.
+    expect(screen.queryByText(/defensa antioxidante de la planta/i)).not.toBeInTheDocument();
   });
 
-  it("al pinchar el nombre del compuesto abre un modal con el detalle", () => {
+  it("al pinchar el nombre del compuesto en la tabla abre un modal con el detalle", () => {
     render(<BibliotecaFito />);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Polifenoles" }));
 
     const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByText(/defensa antioxidante de la planta/i)).toBeInTheDocument();
     expect(within(dialog).getByText(/¿qué es\?/i)).toBeInTheDocument();
     expect(within(dialog).getByText(/detectado en el quintral/i)).toBeInTheDocument();
   });

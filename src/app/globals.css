@@ -1703,41 +1703,25 @@ label.inline {
   margin: 0;
   padding-left: 1.1rem;
 }
-.ficha-nombre-btn {
+.fito-compuesto-btn {
   appearance: none;
   border: 0;
   background: none;
   padding: 0;
   margin: 0;
   font: inherit;
-  color: inherit;
-  cursor: pointer;
-  text-align: left;
-}
-.ficha-nombre-btn:hover,
-.ficha-nombre-btn:focus-visible {
-  color: var(--forest-bright);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.ficha-vermas {
-  appearance: none;
-  background: none;
-  border: 0;
-  padding: 0.7rem 0 0;
-  margin-top: 0.6rem;
-  border-top: 1px dashed var(--line);
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  font: inherit;
   font-weight: 600;
-  color: var(--forest-bright);
-}
-.ficha-vermas:hover,
-.ficha-vermas:focus-visible {
+  color: var(--forest);
+  cursor: pointer;
+  text-align: left;
   text-decoration: underline;
+  text-decoration-style: dotted;
   text-underline-offset: 3px;
+}
+.fito-compuesto-btn:hover,
+.fito-compuesto-btn:focus-visible {
+  color: var(--forest-bright);
+  text-decoration-style: solid;
 }
 .ficha-estudios {
   margin: 0.4rem 0 0;

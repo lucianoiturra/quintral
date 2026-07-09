@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { BIBLIOTECA, type FichaCompuesto } from "@/lib/bibliotecaFito";
+import { type FichaCompuesto } from "@/lib/bibliotecaFito";
 import MatrizFito from "@/components/MatrizFito";
 
 export default function BibliotecaFito() {
@@ -21,43 +21,7 @@ export default function BibliotecaFito() {
 
   return (
     <div className="biblioteca">
-      <MatrizFito />
-
-      <div className="biblioteca-grid">
-        {BIBLIOTECA.map((ficha) => (
-          <article key={ficha.id} className="card card-pad ficha">
-            <span className="ficha-familia">{ficha.familia}</span>
-            <h4 className="ficha-nombre">
-              <button
-                type="button"
-                className="ficha-nombre-btn"
-                onClick={() => setActiva(ficha)}
-                aria-haspopup="dialog"
-              >
-                {ficha.nombre}
-              </button>
-            </h4>
-            <p className="ficha-resumen">{ficha.resumen}</p>
-
-            <ul className="ficha-chips" aria-label="Aplicaciones biomédicas">
-              {ficha.aplicacionesBiomedicas.map((a) => (
-                <li key={a} className="ficha-chip">
-                  {a.replace(/\.$/, "")}
-                </li>
-              ))}
-            </ul>
-
-            <button
-              type="button"
-              className="ficha-vermas"
-              onClick={() => setActiva(ficha)}
-              aria-haspopup="dialog"
-            >
-              Ver función y estudios
-            </button>
-          </article>
-        ))}
-      </div>
+      <MatrizFito onSelectCompuesto={setActiva} />
 
       {activa ? (
         <div
