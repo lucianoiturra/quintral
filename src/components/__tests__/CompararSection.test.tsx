@@ -3,24 +3,20 @@ import { render, screen } from "@testing-library/react";
 import CompararSection from "@/components/CompararSection";
 
 describe("CompararSection", () => {
-  it("muestra el título, la tabla con datos reales y antocianinas n/d", () => {
+  it("se titula Biblioteca fitoquímica", () => {
     render(<CompararSection />);
     expect(
-      screen.getByRole("heading", {
-        name: /perfil fitoquímico del quintral/i,
-      }),
+      screen.getByRole("heading", { level: 2, name: /biblioteca fitoquímica/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/S-218-25/)).toBeInTheDocument();
-    expect(screen.getAllByText("n/d").length).toBeGreaterThan(0);
   });
 
-  it("incluye la biblioteca fitoquímica y la evidencia antimicrobiana", () => {
+  it("incluye la biblioteca de compuestos y la evidencia antimicrobiana", () => {
     render(<CompararSection />);
+    expect(screen.getAllByText("Polifenoles").length).toBeGreaterThan(0);
     expect(
-      screen.getByRole("heading", { name: /biblioteca fitoquímica/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: /evidencia sobre actividad antimicrobiana/i }),
+      screen.getByRole("heading", {
+        name: /evidencia sobre actividad antimicrobiana/i,
+      }),
     ).toBeInTheDocument();
   });
 });

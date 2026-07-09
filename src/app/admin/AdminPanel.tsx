@@ -7,6 +7,11 @@ import {
   buildAdminDashboardSummary,
   type AdminStatusFilter,
 } from "@/app/admin/dashboard";
+import {
+  findDuplicateGroups,
+  idsDeDuplicados,
+  contarDuplicados,
+} from "@/app/admin/duplicates";
 
 type AdminLogEntry = {
   id: string;
@@ -46,6 +51,9 @@ export default function AdminPanel() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<EditForm | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [dedupConfirm, setDedupConfirm] = useState(false);
+  const [dedupBorrando, setDedupBorrando] = useState(false);
+  const [dedupResultado, setDedupResultado] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -162,6 +170,32 @@ export default function AdminPanel() {
     prependLog(id, "borrada");
   }
 
+  async function borrarDuplicados(ids: string[]) {
+    if (ids.length === 0) return;
+    setDedupBorrando(true);
+    setError(null);
+    setDedupResultado(null);
+
+    const response = await fetch("/api/admin/observaciones/bulk-delete", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ ids }),
+    });
+
+    if (!response.ok) {
+      setError(await readErrorMessage(response, "No se pudieron borrar los duplicados."));
+      setDedupBorrando(false);
+      return;
+    }
+
+    const idSet = new Set(ids);
+    setObservations((current) => current.filter((item) => !idSet.has(item.id)));
+    setDedupConfirm(false);
+    setDedupBorrando(false);
+    setDedupResultado(`Se borraron ${ids.length} registro(s) duplicado(s).`);
+    prependLog(null, `borrado_masivo (${ids.length})`);
+  }
+
   function prependLog(observacionId: string | null, accion: string) {
     setLogEntries((current) => [
       {
@@ -179,6 +213,10 @@ export default function AdminPanel() {
     () => Array.from(new Set(observations.map((observation) => observation.cerro).filter(Boolean))) as string[],
     [observations],
   );
+
+  const duplicateGroups = useMemo(() => findDuplicateGroups(observations), [observations]);
+  const duplicadosIds = useMemo(() => idsDeDuplicados(duplicateGroups), [duplicateGroups]);
+  const totalDuplicados = useMemo(() => contarDuplicados(duplicateGroups), [duplicateGroups]);
 
   const summary = useMemo(
     () =>
@@ -310,6 +348,88 @@ export default function AdminPanel() {
             bars={summary.locationRanking}
           />
         </div>
+      </section>
+
+      <section
+        className="card card-pad rise"
+        style={{
+          marginBottom: "1.5rem",
+          borderColor: totalDuplicados > 0 ? "var(--quintral)" : "var(--line-soft)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            gap: "1rem",
+            flexWrap: "wrap",
+            alignItems: "center",
+          }}
+        >
+          <div style={{ maxWidth: "60ch" }}>
+            <h2 style={{ fontSize: "1.45rem", marginBottom: "0.35rem" }}>Duplicados</h2>
+            <p style={{ margin: 0, color: "var(--ink-soft)" }}>
+              {loading
+                ? "Analizando registros…"
+                : totalDuplicados > 0
+                  ? `Se detectaron ${totalDuplicados} registro(s) duplicado(s) en ${duplicateGroups.length} grupo(s). Se conserva el más antiguo de cada grupo y se borran las copias.`
+                  : "No se detectaron duplicados. Cada registro es único por observador, coordenadas, hospedero y fenología."}
+            </p>
+            {dedupResultado ? (
+              <p className="alert alert--ok" style={{ marginTop: "0.75rem" }}>
+                {dedupResultado}
+              </p>
+            ) : null}
+          </div>
+
+          {totalDuplicados > 0 && !dedupConfirm ? (
+            <button
+              type="button"
+              className="btn btn--primary"
+              onClick={() => setDedupConfirm(true)}
+              disabled={dedupBorrando}
+            >
+              Borrar {totalDuplicados} duplicado(s)
+            </button>
+          ) : null}
+        </div>
+
+        {dedupConfirm ? (
+          <div
+            style={{
+              marginTop: "1rem",
+              padding: "0.9rem 1rem",
+              border: "1px solid var(--line-soft)",
+              borderRadius: "var(--r-md)",
+              background: "var(--bg-alt)",
+            }}
+          >
+            <p style={{ margin: "0 0 0.75rem" }}>
+              ¿Borrar {totalDuplicados} registro(s) duplicado(s)? Se conservará el más
+              antiguo de cada grupo. Esta acción no se puede deshacer.
+            </p>
+            <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
+              <button
+                type="button"
+                className="btn btn--primary"
+                style={{ ...smallButton, color: "var(--quintral-deep)" }}
+                onClick={() => borrarDuplicados(duplicadosIds)}
+                disabled={dedupBorrando}
+              >
+                {dedupBorrando ? "Borrando…" : "Sí, borrar duplicados"}
+              </button>
+              <button
+                type="button"
+                className="btn btn--ghost"
+                style={smallButton}
+                onClick={() => setDedupConfirm(false)}
+                disabled={dedupBorrando}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        ) : null}
       </section>
 
       <section className="card card-pad rise" style={{ display: "grid", gap: "1rem" }}>

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import ConnectionBadge from "@/components/ConnectionBadge";
 
-const SECTIONS = ["identificar", "mapa", "comparar", "predecir", "antibacteriano", "preguntas", "aportar"] as const;
+const SECTIONS = ["identificar", "mapa", "aportar", "comparar", "antibacteriano", "preguntas"] as const;
 
 export default function Nav() {
   const [open, setOpen] = useState(false);
@@ -78,11 +78,10 @@ export default function Nav() {
         <div id="nav-menu" className={`nav-links${open ? " nav-links--open" : ""}`}>
           {link("#identificar", "Identificar")}
           {link("#mapa", "Mapa")}
-          {link("#comparar", "Compuestos")}
-          {link("#predecir", "Predicción")}
+          {link("#aportar", "Ciencia ciudadana")}
+          {link("#comparar", "Biblioteca")}
           {link("#antibacteriano", "Antibacteriano")}
           {link("#preguntas", "Preguntas")}
-          {link("#aportar", "Ciencia ciudadana")}
         </div>
         <ConnectionBadge />
       </div>

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import BibliotecaFito from "@/components/BibliotecaFito";
 
 describe("BibliotecaFito", () => {
@@ -11,15 +11,23 @@ describe("BibliotecaFito", () => {
     expect(screen.getByText(/defensa antioxidante de la planta/i)).toBeInTheDocument();
   });
 
-  it("muestra las aplicaciones como chips y pliega el detalle", () => {
+  it("al pinchar el nombre del compuesto abre un modal con el detalle", () => {
     render(<BibliotecaFito />);
-    // el resumen "¿Qué es?" completo vive dentro de un <details> plegado
-    expect(screen.getAllByText(/ver función y estudios/i).length).toBe(6);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Polifenoles" }));
+
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByText(/¿qué es\?/i)).toBeInTheDocument();
+    expect(within(dialog).getByText(/detectado en el quintral/i)).toBeInTheDocument();
   });
 
-  it("incluye enlaces a los estudios científicos", () => {
+  it("el modal incluye enlaces a los estudios científicos", () => {
     render(<BibliotecaFito />);
-    const enlaces = screen.getAllByRole("link", {
+    fireEvent.click(screen.getByRole("button", { name: "Polifenoles" }));
+
+    const dialog = screen.getByRole("dialog");
+    const enlaces = within(dialog).getAllByRole("link", {
       name: /ver estudio|scielo|Torres|Simirgiotis/i,
     });
     expect(enlaces.length).toBeGreaterThan(0);
@@ -27,5 +35,14 @@ describe("BibliotecaFito", () => {
       expect(a).toHaveAttribute("target", "_blank");
       expect(a).toHaveAttribute("rel", expect.stringContaining("noopener"));
     }
+  });
+
+  it("cierra el modal con el botón cerrar", () => {
+    render(<BibliotecaFito />);
+    fireEvent.click(screen.getByRole("button", { name: "Polifenoles" }));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /cerrar/i }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });

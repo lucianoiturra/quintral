@@ -8,6 +8,7 @@ vi.mock("react-leaflet", () => ({
   TileLayer: () => null,
   CircleMarker: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   Popup: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  useMap: () => ({ setView: () => {}, fitBounds: () => {} }),
 }));
 
 vi.mock("leaflet/dist/leaflet.css", () => ({}));

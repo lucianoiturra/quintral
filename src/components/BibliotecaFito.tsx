@@ -1,23 +1,42 @@
 "use client";
-import { BIBLIOTECA } from "@/lib/bibliotecaFito";
+import { useEffect, useState } from "react";
+import { BIBLIOTECA, type FichaCompuesto } from "@/lib/bibliotecaFito";
 import MatrizFito from "@/components/MatrizFito";
 
 export default function BibliotecaFito() {
+  const [activa, setActiva] = useState<FichaCompuesto | null>(null);
+
+  useEffect(() => {
+    if (!activa) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setActiva(null);
+    }
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [activa]);
+
   return (
     <div className="biblioteca">
-      <h3 className="biblioteca-titulo">Biblioteca fitoquímica</h3>
-      <p className="biblioteca-intro">
-        Los compuestos detectados en el quintral y las propiedades biomédicas que se
-        investigan. La tabla resume el panorama; cada ficha guarda el detalle.
-      </p>
-
       <MatrizFito />
 
       <div className="biblioteca-grid">
         {BIBLIOTECA.map((ficha) => (
           <article key={ficha.id} className="card card-pad ficha">
             <span className="ficha-familia">{ficha.familia}</span>
-            <h4 className="ficha-nombre">{ficha.nombre}</h4>
+            <h4 className="ficha-nombre">
+              <button
+                type="button"
+                className="ficha-nombre-btn"
+                onClick={() => setActiva(ficha)}
+                aria-haspopup="dialog"
+              >
+                {ficha.nombre}
+              </button>
+            </h4>
             <p className="ficha-resumen">{ficha.resumen}</p>
 
             <ul className="ficha-chips" aria-label="Aplicaciones biomédicas">
@@ -28,36 +47,80 @@ export default function BibliotecaFito() {
               ))}
             </ul>
 
-            <details className="ficha-detalle">
-              <summary>Ver función y estudios</summary>
-
-              <p className="ficha-label">¿Qué es?</p>
-              <p>{ficha.queEs}</p>
-
-              <p className="ficha-label">¿Qué función tiene en la planta?</p>
-              <ul className="ficha-lista">
-                {ficha.funcionEnPlanta.map((f) => (
-                  <li key={f}>{f}</li>
-                ))}
-              </ul>
-
-              <p className="alert alert--ok">✅ Detectado en el quintral.</p>
-
-              <p className="ficha-label">Estudios científicos</p>
-              <ul className="ficha-estudios">
-                {ficha.estudios.map((e) => (
-                  <li key={e.url + e.cita}>
-                    <strong>{e.cita}.</strong> {e.descripcion}{" "}
-                    <a href={e.url} target="_blank" rel="noopener noreferrer">
-                      Ver estudio
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </details>
+            <button
+              type="button"
+              className="ficha-vermas"
+              onClick={() => setActiva(ficha)}
+              aria-haspopup="dialog"
+            >
+              Ver función y estudios
+            </button>
           </article>
         ))}
       </div>
+
+      {activa ? (
+        <div
+          className="fito-modal-overlay"
+          role="presentation"
+          onClick={() => setActiva(null)}
+        >
+          <div
+            className="fito-modal card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="fito-modal-titulo"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="fito-modal-cerrar"
+              aria-label="Cerrar"
+              onClick={() => setActiva(null)}
+            >
+              ×
+            </button>
+
+            <span className="ficha-familia">{activa.familia}</span>
+            <h4 id="fito-modal-titulo" className="ficha-nombre">
+              {activa.nombre}
+            </h4>
+            <p className="ficha-resumen">{activa.resumen}</p>
+
+            <ul className="ficha-chips" aria-label="Aplicaciones biomédicas">
+              {activa.aplicacionesBiomedicas.map((a) => (
+                <li key={a} className="ficha-chip">
+                  {a.replace(/\.$/, "")}
+                </li>
+              ))}
+            </ul>
+
+            <p className="ficha-label">¿Qué es?</p>
+            <p>{activa.queEs}</p>
+
+            <p className="ficha-label">¿Qué función tiene en la planta?</p>
+            <ul className="ficha-lista">
+              {activa.funcionEnPlanta.map((f) => (
+                <li key={f}>{f}</li>
+              ))}
+            </ul>
+
+            <p className="alert alert--ok">✅ Detectado en el quintral.</p>
+
+            <p className="ficha-label">Estudios científicos</p>
+            <ul className="ficha-estudios">
+              {activa.estudios.map((e) => (
+                <li key={e.url + e.cita}>
+                  <strong>{e.cita}.</strong> {e.descripcion}{" "}
+                  <a href={e.url} target="_blank" rel="noopener noreferrer">
+                    Ver estudio
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -1,12 +1,11 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Observation } from "@/lib/types";
 import { fetchObservations } from "@/lib/observations";
 import { useOfflineQueue } from "@/lib/offline/useOfflineQueue";
 import IdentifySection from "@/components/IdentifySection";
 import MapSection from "@/components/MapSection";
 import CompararSection from "@/components/CompararSection";
-import PrediccionSection from "@/components/PrediccionSection";
 import AntibacterianoSection from "@/components/AntibacterianoSection";
 import FaqSection from "@/components/FaqSection";
 import ContributeForm, { type Prefill } from "@/components/ContributeForm";
@@ -15,9 +14,11 @@ import PendingPanel from "@/components/PendingPanel";
 export default function HomeClient() {
   const [observations, setObservations] = useState<Observation[]>([]);
   const [prefill, setPrefill] = useState<Prefill | null>(null);
-  const { pendientes, encolar, sincronizar, sincronizando } = useOfflineQueue((o) =>
-    setObservations((prev) => [o, ...prev]),
+  const onSynced = useCallback(
+    (o: Observation) => setObservations((prev) => [o, ...prev]),
+    [],
   );
+  const { pendientes, encolar, sincronizar, sincronizando } = useOfflineQueue(onSynced);
 
   useEffect(() => {
     fetchObservations().then(setObservations).catch(() => setObservations([]));
@@ -27,12 +28,11 @@ export default function HomeClient() {
     <>
       <IdentifySection onPrefill={setPrefill} />
       <MapSection observations={observations} />
-      <CompararSection />
-      <PrediccionSection />
-      <AntibacterianoSection />
-      <FaqSection />
       <ContributeForm prefill={prefill} onQueue={encolar} />
       <PendingPanel pendientes={pendientes} sincronizar={sincronizar} sincronizando={sincronizando} />
+      <CompararSection />
+      <AntibacterianoSection />
+      <FaqSection />
     </>
   );
 }

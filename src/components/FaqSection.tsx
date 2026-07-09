@@ -5,7 +5,7 @@ export default function FaqSection() {
   return (
     <section id="preguntas" className="section">
       <div className="section-head">
-        <p className="kicker" data-num="05">
+        <p className="kicker" data-num="06">
           Asistente científico
         </p>
         <h2>Preguntas frecuentes sobre el quintral</h2>

@@ -1703,19 +1703,98 @@ label.inline {
   margin: 0;
   padding-left: 1.1rem;
 }
-.ficha-detalle summary {
+.ficha-nombre-btn {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
   cursor: pointer;
-  font-weight: 600;
+  text-align: left;
+}
+.ficha-nombre-btn:hover,
+.ficha-nombre-btn:focus-visible {
   color: var(--forest-bright);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.ficha-vermas {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0.7rem 0 0;
   margin-top: 0.6rem;
   border-top: 1px dashed var(--line);
-  padding-top: 0.7rem;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  color: var(--forest-bright);
+}
+.ficha-vermas:hover,
+.ficha-vermas:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .ficha-estudios {
   margin: 0.4rem 0 0;
   padding-left: 1.1rem;
   display: grid;
   gap: 0.5rem;
+}
+
+/* Modal de detalle del compuesto */
+.fito-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  display: grid;
+  place-items: start center;
+  padding: clamp(1rem, 5vh, 3rem) 1rem;
+  overflow-y: auto;
+  background: oklch(0.2 0.02 150 / 0.55);
+  backdrop-filter: blur(4px);
+}
+.fito-modal {
+  position: relative;
+  width: min(100%, 40rem);
+  padding: 1.75rem clamp(1.25rem, 4vw, 2rem);
+  animation: rise-in 0.18s ease-out;
+}
+.fito-modal-cerrar {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.9rem;
+  appearance: none;
+  border: 0;
+  background: none;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: var(--r-sm);
+}
+.fito-modal-cerrar:hover,
+.fito-modal-cerrar:focus-visible {
+  color: var(--ink);
+  background: var(--line-soft);
+}
+.fito-modal .ficha-nombre {
+  margin: 0.35rem 2rem 0.15rem 0;
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.6rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Evidencia: narrativa + veredicto */

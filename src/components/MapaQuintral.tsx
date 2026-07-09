@@ -1,11 +1,30 @@
 "use client";
 import "leaflet/dist/leaflet.css";
-import { CircleMarker, MapContainer, Popup, TileLayer } from "react-leaflet";
+import { useEffect } from "react";
+import { CircleMarker, MapContainer, Popup, TileLayer, useMap } from "react-leaflet";
 import { colorHospedero, etiquetaHospedero } from "@/lib/hosts";
 import { isSafePhotoUrl } from "@/lib/photoUrl";
 import type { Observation } from "@/lib/types";
 
 const CENTRO_DEFAULT: [number, number] = [-33.3560, -70.5720];
+
+// Ajusta el encuadre a los puntos visibles cada vez que cambia el filtro
+// (por ejemplo, al seleccionar un cerro) para hacer zoom sobre ellos.
+function AjustarEncuadre({ observations }: { observations: Observation[] }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (observations.length === 0) return;
+    if (observations.length === 1) {
+      map.setView([observations[0].lat, observations[0].lng], 15, { animate: true });
+      return;
+    }
+    const bounds: [number, number][] = observations.map((o) => [o.lat, o.lng]);
+    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 16, animate: true });
+  }, [map, observations]);
+
+  return null;
+}
 
 export default function MapaQuintral({ observations }: { observations: Observation[] }) {
   const centro: [number, number] = observations.length
@@ -17,6 +36,7 @@ export default function MapaQuintral({ observations }: { observations: Observati
 
   return (
     <MapContainer center={centro} zoom={14} style={{ height: "100%", width: "100%" }}>
+      <AjustarEncuadre observations={observations} />
       <TileLayer
         url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution="&copy; OpenStreetMap"
