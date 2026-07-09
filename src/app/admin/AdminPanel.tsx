@@ -176,24 +176,28 @@ export default function AdminPanel() {
     setError(null);
     setDedupResultado(null);
 
-    const response = await fetch("/api/admin/observaciones/bulk-delete", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ids }),
-    });
+    try {
+      const response = await fetch("/api/admin/observaciones/bulk-delete", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ ids }),
+      });
 
-    if (!response.ok) {
-      setError(await readErrorMessage(response, "No se pudieron borrar los duplicados."));
+      if (!response.ok) {
+        setError(await readErrorMessage(response, "No se pudieron borrar los duplicados."));
+        return;
+      }
+
+      const idSet = new Set(ids);
+      setObservations((current) => current.filter((item) => !idSet.has(item.id)));
+      setDedupConfirm(false);
+      setDedupResultado(`Se borraron ${ids.length} registro(s) duplicado(s).`);
+      prependLog(null, `borrado_masivo (${ids.length})`);
+    } catch {
+      setError("No se pudieron borrar los duplicados. Revisa tu conexión e inténtalo de nuevo.");
+    } finally {
       setDedupBorrando(false);
-      return;
     }
-
-    const idSet = new Set(ids);
-    setObservations((current) => current.filter((item) => !idSet.has(item.id)));
-    setDedupConfirm(false);
-    setDedupBorrando(false);
-    setDedupResultado(`Se borraron ${ids.length} registro(s) duplicado(s).`);
-    prependLog(null, `borrado_masivo (${ids.length})`);
   }
 
   function prependLog(observacionId: string | null, accion: string) {
