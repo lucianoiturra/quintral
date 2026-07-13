@@ -8,7 +8,12 @@ export default function MatrizFito({
 }) {
   return (
     <div className="fito-matriz">
-      <div className="fito-matriz-scroll">
+      <div
+        className="fito-matriz-scroll"
+        role="region"
+        aria-label="Matriz de compuestos y propiedades"
+        tabIndex={0}
+      >
         <table className="fito-matriz-tabla">
           <thead>
             <tr>
@@ -51,6 +56,9 @@ export default function MatrizFito({
           </tbody>
         </table>
       </div>
+      <p className="fito-matriz-hint" aria-hidden="true">
+        Desliza la tabla de lado para ver todas las propiedades →
+      </p>
       <p className="fito-matriz-nota">
         Pincha el nombre de un compuesto para ver su ficha completa. Casi todos los
         compuestos del quintral son{" "}

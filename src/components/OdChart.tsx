@@ -45,93 +45,103 @@ export default function OdChart({
     .join(". ");
 
   return (
-    <svg
-      viewBox={`0 0 ${w} ${h}`}
-      className="od-chart"
-      role="img"
-      aria-label={`Gráfico OD 600 nm. ${resumen}`}
-    >
-      {ticks.map((t) => (
-        <g key={t}>
-          <line x1={padL} y1={yDe(t)} x2={w - padR} y2={yDe(t)} className="bar-grid" />
-          <text
-            x={padL - 8}
-            y={yDe(t)}
-            className="bar-tick"
-            textAnchor="end"
-            dominantBaseline="middle"
-          >
-            {t}
-          </text>
-        </g>
-      ))}
-
-      {categorias.map((cat, ci) => {
-        const gx = padL + ci * grupoW;
-        return (
-          <g key={cat}>
-            {series.map((s, si) => {
-              const v = s.valores[ci];
-              const x = gx + grupoW * 0.15 + si * barW;
-              const y = yDe(v);
-              const bh = plotH * (v / maxY);
-              const activo = hover?.cat === ci && hover?.serie === si;
-              const marca = s.signif?.[ci];
-              return (
-                <g key={s.nombre}>
-                  <rect
-                    x={x}
-                    y={y}
-                    width={barW}
-                    height={bh}
-                    rx={3}
-                    fill={s.color}
-                    className="od-bar"
-                    opacity={hover && !activo ? 0.45 : 1}
-                    onMouseEnter={() => setHover({ cat: ci, serie: si })}
-                    onMouseLeave={() => setHover(null)}
-                  >
-                    <title>
-                      {`${s.nombre} · ${cat}: ${v} OD${marca ? ` (${marca})` : ""}`}
-                    </title>
-                  </rect>
-                  {marca && (
-                    <text
-                      x={x + barW / 2}
-                      y={Math.max(y - 4, padT + 8)}
-                      className="od-signif"
-                      textAnchor="middle"
-                    >
-                      {marca}
-                    </text>
-                  )}
-                </g>
-              );
-            })}
+    <div className="chart-scroll">
+      <svg
+        viewBox={`0 0 ${w} ${h}`}
+        className="od-chart"
+        role="img"
+        aria-label={`Gráfico OD 600 nm. ${resumen}`}
+      >
+        {ticks.map((t) => (
+          <g key={t}>
+            <line x1={padL} y1={yDe(t)} x2={w - padR} y2={yDe(t)} className="bar-grid" />
             <text
-              x={gx + grupoW / 2}
-              y={h - padB + 16}
-              className="bar-cat"
-              textAnchor="middle"
+              x={padL - 8}
+              y={yDe(t)}
+              className="bar-tick"
+              textAnchor="end"
+              dominantBaseline="middle"
             >
-              {cat}
+              {t}
             </text>
           </g>
-        );
-      })}
+        ))}
 
-      {hover &&
-        (() => {
-          const s = series[hover.serie];
-          const v = s.valores[hover.cat];
-          const cx = padL + hover.cat * grupoW + grupoW / 2;
-          const ty = Math.max(yDe(v) - 10, padT + 10);
+        {categorias.map((cat, ci) => {
+          const gx = padL + ci * grupoW;
           return (
-            <text x={cx} y={ty} className="od-tip" textAnchor="middle">
-              {`${s.nombre}: ${v}`}
-            </text>
+            <g key={cat}>
+              {series.map((s, si) => {
+                const v = s.valores[ci];
+                const x = gx + grupoW * 0.15 + si * barW;
+                const y = yDe(v);
+                const bh = plotH * (v / maxY);
+                const activo = hover?.cat === ci && hover?.serie === si;
+                const marca = s.signif?.[ci];
+                return (
+                  <g key={s.nombre}>
+                    <rect
+                      x={x}
+                      y={y}
+                      width={barW}
+                      height={bh}
+                      rx={3}
+                      fill={s.color}
+                      className="od-bar"
+                      opacity={hover && !activo ? 0.45 : 1}
+                      /* En táctil no hay hover: el valor se revela al tocar la
+                         barra y se oculta al volver a tocarla. El lector de
+                         pantalla ya recibe la serie completa por el aria-label
+                         del SVG, así que las barras no necesitan foco propio. */
+                      onMouseEnter={() => setHover({ cat: ci, serie: si })}
+                      onMouseLeave={() => setHover(null)}
+                      onClick={() => setHover(activo ? null : { cat: ci, serie: si })}
+                    >
+                      <title>
+                        {`${s.nombre} · ${cat}: ${v} OD${marca ? ` (${marca})` : ""}`}
+                      </title>
+                    </rect>
+                    {marca && hover?.cat !== ci && (
+                      <text
+                        x={x + barW / 2}
+                        y={Math.max(y - 4, padT + 8)}
+                        className="od-signif"
+                        textAnchor="middle"
+                      >
+                        {marca}
+                      </text>
+                    )}
+                  </g>
+                );
+              })}
+              <text
+                x={gx + grupoW / 2}
+                y={h - padB + 16}
+                className="bar-cat"
+                textAnchor="middle"
+              >
+                {cat}
+              </text>
+            </g>
           );
-        })()}
-    </svg>
+        })}
+
+        {hover &&
+          (() => {
+            const s = series[hover.serie];
+            const v = s.valores[hover.cat];
+            const cx = padL + hover.cat * grupoW + grupoW / 2;
+            // Sobre la barra más alta del grupo: si se apoyara solo en la barra
+            // activa, el rótulo caería encima de la barra vecina.
+            const topeGrupo = Math.max(...series.map((x) => x.valores[hover.cat]));
+            const ty = Math.max(yDe(topeGrupo) - 12, padT + 10);
+            return (
+              <text x={cx} y={ty} className="od-tip" textAnchor="middle">
+                {`${s.nombre}: ${v}`}
+              </text>
+            );
+          })()}
+      </svg>
+    </div>
   );
 }

@@ -1220,6 +1220,13 @@ label.inline {
   align-items: start;
 }
 
+/* Sin esto, el `min-width: auto` de los ítems de grid deja que el ancho
+   mínimo del gráfico (480px en móvil) estire la columna y, con ella, la
+   página entera. */
+.chart-grid > * {
+  min-width: 0;
+}
+
 /* El colapso a una columna del bloque de arriba (línea ~1205) queda ANTES de
    esta definición base, así que no la vencía por orden de cascada. Repetimos
    aquí, después de la base, para que la tabla+gráfico se apilen en móvil. */
@@ -1537,6 +1544,91 @@ label.inline {
   }
 }
 
+/* ------------------------------------------------------------
+   Táctil: todo control interactivo llega a 44×44 px cuando el
+   puntero es grueso (dedo). En puntero fino se mantiene la
+   densidad original de escritorio.
+   ------------------------------------------------------------ */
+@media (pointer: coarse) {
+  .tab,
+  .pill {
+    min-height: 44px;
+  }
+
+  .nav-toggle {
+    width: 44px;
+    height: 44px;
+  }
+
+  .fito-compuesto-btn {
+    min-height: 44px;
+    padding-block: 0.6rem;
+  }
+
+  .faq-item summary,
+  .ensayo-detalle summary {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  .faq-item summary::after {
+    margin-left: auto;
+    float: none;
+  }
+
+  /* Zoom de Leaflet: 30px por defecto. Leaflet declara su propio
+     `.leaflet-touch .leaflet-bar a` y su hoja se inyecta después de esta,
+     así que hace falta subir la especificidad con .map-frame. */
+  .map-frame .leaflet-touch .leaflet-bar a {
+    width: 44px;
+    height: 44px;
+    line-height: 44px;
+    font-size: 1.35rem;
+  }
+
+  /* Nav horizontal en tablet: los enlaces medían 33px de alto */
+  .nav-links a,
+  .brand {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+/* ------------------------------------------------------------
+   Gráficos SVG en móvil
+   El viewBox de 520 u se dibujaba a ~300 px en un teléfono
+   (escala 0.58): las etiquetas de 11 u aterrizaban en ~6 px
+   reales, ilegibles. Agrandar la tipografía no sirve, porque
+   con 10 concentraciones × 2 series las marcas de significancia
+   se pisan entre sí. Le damos al gráfico su ancho natural y lo
+   desplazamos dentro de la tarjeta.
+   ------------------------------------------------------------ */
+.chart-scroll {
+  overflow-x: auto;
+  contain: content;
+}
+
+@media (max-width: 640px) {
+  .chart-scroll {
+    /* Sombras de borde que solo asoman con scroll pendiente */
+    background-image: linear-gradient(to right, var(--surface) 40%, transparent),
+      linear-gradient(to left, var(--surface) 40%, transparent),
+      linear-gradient(to right, oklch(0.24 0.04 158 / 0.14), transparent),
+      linear-gradient(to left, oklch(0.24 0.04 158 / 0.14), transparent);
+    background-position: left center, right center, left center, right center;
+    background-size: 24px 100%, 24px 100%, 12px 100%, 12px 100%;
+    background-repeat: no-repeat;
+    background-attachment: local, local, scroll, scroll;
+  }
+
+  .chart-scroll .od-chart,
+  .chart-scroll .bar-chart {
+    min-width: 480px;
+  }
+}
+
 /* Acciones de identificación: stack vertical en móvil */
 @media (max-width: 480px) {
   .identify-actions {
@@ -1661,7 +1753,33 @@ label.inline {
   contain: content;
   border: 1px solid var(--line);
   border-radius: var(--r-md);
-  background: var(--surface);
+  background-color: var(--surface);
+  /* Sombras de borde que solo aparecen cuando queda tabla por desplazar:
+     las capas `local` tapan las `scroll` mientras no hay scroll en ese lado. */
+  background-image: linear-gradient(to right, var(--surface) 40%, transparent),
+    linear-gradient(to left, var(--surface) 40%, transparent),
+    linear-gradient(to right, oklch(0.24 0.04 158 / 0.14), transparent),
+    linear-gradient(to left, oklch(0.24 0.04 158 / 0.14), transparent);
+  background-position: left center, right center, left center, right center;
+  background-size: 28px 100%, 28px 100%, 14px 100%, 14px 100%;
+  background-repeat: no-repeat;
+  background-attachment: local, local, scroll, scroll;
+  scroll-snap-type: x proximity;
+}
+
+.fito-matriz-hint {
+  display: none;
+  margin: 0.5rem 0 0;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+
+/* La tabla mide 40rem: por debajo de ~900px siempre hay columnas fuera de
+   vista, así que anunciamos el gesto en vez de dejarlas escondidas. */
+@media (max-width: 900px) {
+  .fito-matriz-hint {
+    display: block;
+  }
 }
 .fito-matriz-tabla {
   border-collapse: collapse;
@@ -1682,13 +1800,25 @@ label.inline {
   color: var(--ink-soft);
   vertical-align: bottom;
 }
+/* La columna de compuestos queda fija; el encabezado tiene que fijarse con
+   ella o el título se despega de su columna al desplazar. */
+.fito-matriz-tabla thead th:first-child,
 .fito-matriz-tabla tbody th {
-  text-align: left;
-  white-space: nowrap;
   position: sticky;
   left: 0;
   background: var(--surface);
+  text-align: left;
+  white-space: nowrap;
+  /* borde propio: el `border-bottom` de la celda no viaja con position:sticky
+     en el eje derecho, y sin esta línea la columna fija se confunde con las
+     que pasan por debajo */
+  box-shadow: 1px 0 0 var(--line);
+}
+.fito-matriz-tabla tbody th {
   font-weight: 600;
+}
+.fito-matriz-tabla td {
+  scroll-snap-align: end;
 }
 .fito-cell.yes {
   color: var(--forest-bright);
