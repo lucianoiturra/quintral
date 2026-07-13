@@ -16,9 +16,11 @@ describe("AntibacterianoSection", () => {
     expect(screen.getAllByText(/Staphylococcus aureus/).length).toBeGreaterThan(0);
   });
 
-  it("declara que los datos son leídos de figura y reserva lugar para bacterias marinas", () => {
+  it("declara que los datos son leídos de figura e incluye las bacterias marinas", () => {
     render(<AntibacterianoSection />);
-    expect(screen.getByText(/leídas de las figuras/)).toBeInTheDocument();
-    expect(screen.getByText(/Bacterias marinas/)).toBeInTheDocument();
+    expect(screen.getAllByText(/leídas de las figuras/).length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("heading", { name: /Bacterias marinas/ }),
+    ).toBeInTheDocument();
   });
 });

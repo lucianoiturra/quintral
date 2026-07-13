@@ -5,6 +5,7 @@ export interface SerieOD {
   nombre: string;
   color: string;
   valores: number[]; // uno por categoría
+  signif?: (string | null)[]; // marca sobre la barra: ns, *, **, ***
 }
 
 export interface OdChartProps {
@@ -75,22 +76,36 @@ export default function OdChart({
               const y = yDe(v);
               const bh = plotH * (v / maxY);
               const activo = hover?.cat === ci && hover?.serie === si;
+              const marca = s.signif?.[ci];
               return (
-                <rect
-                  key={s.nombre}
-                  x={x}
-                  y={y}
-                  width={barW}
-                  height={bh}
-                  rx={3}
-                  fill={s.color}
-                  className="od-bar"
-                  opacity={hover && !activo ? 0.45 : 1}
-                  onMouseEnter={() => setHover({ cat: ci, serie: si })}
-                  onMouseLeave={() => setHover(null)}
-                >
-                  <title>{`${s.nombre} · ${cat}: ${v} OD`}</title>
-                </rect>
+                <g key={s.nombre}>
+                  <rect
+                    x={x}
+                    y={y}
+                    width={barW}
+                    height={bh}
+                    rx={3}
+                    fill={s.color}
+                    className="od-bar"
+                    opacity={hover && !activo ? 0.45 : 1}
+                    onMouseEnter={() => setHover({ cat: ci, serie: si })}
+                    onMouseLeave={() => setHover(null)}
+                  >
+                    <title>
+                      {`${s.nombre} · ${cat}: ${v} OD${marca ? ` (${marca})` : ""}`}
+                    </title>
+                  </rect>
+                  {marca && (
+                    <text
+                      x={x + barW / 2}
+                      y={Math.max(y - 4, padT + 8)}
+                      className="od-signif"
+                      textAnchor="middle"
+                    >
+                      {marca}
+                    </text>
+                  )}
+                </g>
               );
             })}
             <text

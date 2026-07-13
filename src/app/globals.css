@@ -1220,6 +1220,15 @@ label.inline {
   align-items: start;
 }
 
+/* El colapso a una columna del bloque de arriba (línea ~1205) queda ANTES de
+   esta definición base, así que no la vencía por orden de cascada. Repetimos
+   aquí, después de la base, para que la tabla+gráfico se apilen en móvil. */
+@media (max-width: 860px) {
+  .chart-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .radar {
   width: 100%;
   height: auto;
@@ -1437,6 +1446,48 @@ label.inline {
   border-style: dashed;
 }
 
+/* Bacterias marinas: P. salmonis */
+
+.salmonis {
+  margin-top: clamp(2rem, 1rem + 3vw, 3.5rem);
+  padding-top: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+  border-top: 1px solid var(--line-soft);
+}
+
+.salmonis-intro {
+  margin: 0 0 1.25rem;
+  max-width: 60ch;
+  color: var(--ink-soft);
+}
+
+.od-signif {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 700;
+  fill: var(--ink-faint);
+}
+
+/* La microplaca es una foto vertical: la acotamos para que no domine la tarjeta. */
+.salmonis-fig img {
+  max-height: 420px;
+  object-fit: contain;
+  background: var(--line-soft);
+}
+
+.salmonis-inhibicion {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+.salmonis-inhibicion strong {
+  color: var(--quintral);
+}
+
 /* ============================================================
    Responsivo: ajustes móvil / tablet
    ============================================================ */
@@ -1605,6 +1656,9 @@ label.inline {
 }
 .fito-matriz-scroll {
   overflow-x: auto;
+  /* contain evita que el ancho intrínseco de la tabla expanda el viewport
+     móvil: la tabla se desplaza dentro de su caja sin romper la página */
+  contain: content;
   border: 1px solid var(--line);
   border-radius: var(--r-md);
   background: var(--surface);

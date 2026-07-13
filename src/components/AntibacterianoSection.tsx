@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import OdChart, { type SerieOD } from "@/components/OdChart";
+import SalmonisSection from "@/components/SalmonisSection";
 import {
   BACTERIAS,
   CONCENTRACIONES,
@@ -45,8 +46,9 @@ export default function AntibacterianoSection() {
         <h2>Actividad antibacteriana del extracto de quintral (2026)</h2>
         <p>
           Extractos etanólicos de quintral obtenidos desde litre y quillay,
-          enfrentados a tres bacterias de referencia por microdilución (OD a
-          600 nm) y antibiograma. Más OD = más crecimiento = menos inhibición.
+          enfrentados a tres bacterias de referencia y a la bacteria marina{" "}
+          <em>Piscirickettsia salmonis</em> por microdilución (OD a 600 nm) y
+          antibiograma. Más OD = más crecimiento = menos inhibición.
         </p>
       </div>
 
@@ -135,21 +137,15 @@ export default function AntibacterianoSection() {
       </div>
 
       <p className="alert alert--ok chart-note antibacteriano-lectura">
-        Lectura honesta: en todos los casos el extracto (128–1024 µg/mL) mantuvo
-        el crecimiento similar al control sin extracto, mientras que la
-        ampicilina (C+) sí lo inhibió. En medio líquido el extracto de quintral
-        no mostró actividad antibacteriana apreciable; en antibiograma se
-        observó un halo menor para algunas combinaciones. Resultado experimental
-        propio 2026.
+        Lectura honesta: en estas tres bacterias de referencia el extracto
+        (128–1024 µg/mL) mantuvo el crecimiento similar al control sin extracto,
+        mientras que la ampicilina (C+) sí lo inhibió. En medio líquido el
+        extracto de quintral no mostró actividad antibacteriana apreciable; en
+        antibiograma se observó un halo menor para algunas combinaciones.
+        Resultado experimental propio 2026.
       </p>
 
-      <div className="card card-pad card--muted">
-        <h3 className="result-title">Bacterias marinas — ensayo en curso</h3>
-        <p className="result-empty">
-          Estamos evaluando el extracto de quintral contra bacterias marinas.
-          Los resultados se sumarán a esta sección cuando estén disponibles.
-        </p>
-      </div>
+      <SalmonisSection />
     </section>
   );
 }
